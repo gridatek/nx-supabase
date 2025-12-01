@@ -1,0 +1,49 @@
+{
+  "name": "@gridatek/nx-supabase",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@gridatek/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/js:tsc",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "options": {
+          "outputPath": "packages/nx-supabase/dist",
+          "main": "packages/nx-supabase/src/index.ts",
+          "tsConfig": "packages/nx-supabase/tsconfig.lib.json",
+          "rootDir": "packages/nx-supabase/src",
+          "generatePackageJson": false,
+          "assets": [
+            {
+              "input": "./packages/nx-supabase/src",
+              "glob": "**/!(*.ts)",
+              "output": "."
+            },
+            {
+              "input": "./packages/nx-supabase/src",
+              "glob": "**/*.d.ts",
+              "output": "."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}
