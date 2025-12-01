@@ -17,6 +17,6 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: 'test-output/jest/coverage',
-  globalSetup: '..\\tools\\scripts\\start-local-registry.ts',
-  globalTeardown: '..\\tools\\scripts\\stop-local-registry.ts',
+  globalSetup: '<rootDir>/../tools/scripts/start-local-registry.ts',
+  globalTeardown: '<rootDir>/../tools/scripts/stop-local-registry.ts',
 };
