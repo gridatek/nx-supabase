@@ -1,10 +1,5 @@
 {
   "generators": {
-    "init": {
-      "factory": "./dist/generators/init/init",
-      "schema": "./dist/generators/init/schema.json",
-      "description": "init generator"
-    },
     "project": {
       "factory": "./dist/generators/project/project",
       "schema": "./dist/generators/project/schema.json",
