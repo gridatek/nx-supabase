@@ -8,7 +8,9 @@ import * as environmentModule from '../environment/environment';
 
 // Mock the environment generator
 vi.mock('../environment/environment', () => ({
-  environmentGenerator: vi.fn().mockResolvedValue(() => {}),
+  environmentGenerator: vi.fn().mockResolvedValue(() => {
+    // Empty callback function for tests
+  }),
 }));
 
 describe('project generator', () => {

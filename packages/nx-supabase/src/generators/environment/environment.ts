@@ -71,7 +71,7 @@ export async function environmentGenerator(
         logger.warn(`  npx supabase init`);
         logger.warn(`  Then move config.toml to ${projectRoot}/${options.name}/config.toml`);
       }
-    } catch (error) {
+    } catch {
       logger.warn('Failed to run supabase init automatically.');
       logger.warn('Please run manually:');
       logger.warn(`  npx supabase init`);
