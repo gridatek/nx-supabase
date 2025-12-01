@@ -1,18 +1,23 @@
 {
   "$schema": "https://json-schema.org/schema",
   "$id": "Environment",
-  "title": "",
+  "title": "Create a Supabase environment",
   "type": "object",
   "properties": {
+    "project": {
+      "type": "string",
+      "description": "The Supabase project to add the environment to",
+      "x-prompt": "Which Supabase project?"
+    },
     "name": {
       "type": "string",
-      "description": "",
+      "description": "Environment name (e.g., local, production, staging)",
       "$default": {
         "$source": "argv",
         "index": 0
       },
-      "x-prompt": "What name would you like to use?"
+      "x-prompt": "What is the environment name?"
     }
   },
-  "required": ["name"]
+  "required": ["project", "name"]
 }

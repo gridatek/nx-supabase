@@ -1,17 +1,27 @@
 {
   "$schema": "https://json-schema.org/schema",
   "$id": "Project",
-  "title": "",
+  "title": "Create a Supabase project",
   "type": "object",
   "properties": {
     "name": {
       "type": "string",
-      "description": "",
+      "description": "The name of the Supabase project",
       "$default": {
         "$source": "argv",
         "index": 0
       },
-      "x-prompt": "What name would you like to use?"
+      "x-prompt": "What is the name of your Supabase project?"
+    },
+    "directory": {
+      "type": "string",
+      "description": "The directory where the project will be created (optional)",
+      "x-prompt": "Where should the project be created? (leave empty for root)"
+    },
+    "environments": {
+      "type": "string",
+      "description": "Comma-separated list of environments to create (default: local)",
+      "default": "local"
     }
   },
   "required": ["name"]

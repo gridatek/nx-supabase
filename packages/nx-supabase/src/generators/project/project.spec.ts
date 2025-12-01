@@ -1,8 +1,15 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { Tree, readProjectConfiguration } from '@nx/devkit';
+import { vi } from 'vitest';
 
 import { projectGenerator } from './project';
 import { ProjectGeneratorSchema } from './schema';
+import * as environmentModule from '../environment/environment';
+
+// Mock the environment generator
+vi.mock('../environment/environment', () => ({
+  environmentGenerator: vi.fn().mockResolvedValue(() => {}),
+}));
 
 describe('project generator', () => {
   let tree: Tree;
@@ -10,11 +17,85 @@ describe('project generator', () => {
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
+    vi.clearAllMocks();
   });
 
-  it('should run successfully', async () => {
+  it('should create project configuration', async () => {
     await projectGenerator(tree, options);
     const config = readProjectConfiguration(tree, 'test');
     expect(config).toBeDefined();
+    expect(config.root).toBe('test');
+    expect(config.projectType).toBe('application');
+  });
+
+  it('should create common directory structure', async () => {
+    await projectGenerator(tree, options);
+    expect(tree.exists('test/common/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/common/seeds/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/.generated/.gitkeep')).toBeTruthy();
+  });
+
+  it('should create .gitignore file', async () => {
+    await projectGenerator(tree, options);
+    expect(tree.exists('test/.gitignore')).toBeTruthy();
+    const gitignore = tree.read('test/.gitignore', 'utf-8');
+    expect(gitignore).toContain('.generated/');
+  });
+
+  it('should create README file', async () => {
+    await projectGenerator(tree, options);
+    expect(tree.exists('test/README.md')).toBeTruthy();
+    const readme = tree.read('test/README.md', 'utf-8');
+    expect(readme).toContain('# test');
+    expect(readme).toContain('Folder Structure');
+  });
+
+  it('should support custom directory', async () => {
+    const optionsWithDir: ProjectGeneratorSchema = {
+      name: 'test',
+      directory: 'apps'
+    };
+    await projectGenerator(tree, optionsWithDir);
+    const config = readProjectConfiguration(tree, 'test');
+    expect(config.root).toBe('apps/test');
+    expect(tree.exists('apps/test/common/migrations/.gitkeep')).toBeTruthy();
+  });
+
+  it('should configure start and stop targets', async () => {
+    await projectGenerator(tree, options);
+    const config = readProjectConfiguration(tree, 'test');
+    expect(config.targets?.start).toBeDefined();
+    expect(config.targets?.start?.executor).toBe('@gridatek/nx-supabase:start');
+    expect(config.targets?.stop).toBeDefined();
+    expect(config.targets?.stop?.executor).toBe('@gridatek/nx-supabase:stop');
+  });
+
+  it('should create default local environment', async () => {
+    await projectGenerator(tree, options);
+    expect(environmentModule.environmentGenerator).toHaveBeenCalledWith(tree, {
+      project: 'test',
+      name: 'local',
+    });
+  });
+
+  it('should create multiple environments when specified', async () => {
+    const optionsWithEnvs: ProjectGeneratorSchema = {
+      name: 'test',
+      environments: 'local,staging,production',
+    };
+    await projectGenerator(tree, optionsWithEnvs);
+    expect(environmentModule.environmentGenerator).toHaveBeenCalledTimes(3);
+    expect(environmentModule.environmentGenerator).toHaveBeenCalledWith(tree, {
+      project: 'test',
+      name: 'local',
+    });
+    expect(environmentModule.environmentGenerator).toHaveBeenCalledWith(tree, {
+      project: 'test',
+      name: 'staging',
+    });
+    expect(environmentModule.environmentGenerator).toHaveBeenCalledWith(tree, {
+      project: 'test',
+      name: 'production',
+    });
   });
 });
