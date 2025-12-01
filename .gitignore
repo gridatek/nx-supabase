@@ -45,3 +45,6 @@ Thumbs.db
 
 vitest.config.*.timestamp*
 test-output
+
+# E2E test artifacts
+e2e/test-project
