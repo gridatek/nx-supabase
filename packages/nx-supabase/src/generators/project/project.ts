@@ -105,7 +105,7 @@ nx g @gridatek/nx-supabase:environment --project=${options.name} --name=producti
     .filter(env => env.length > 0);
 
   // Create each environment using the environment generator
-  const envCallbacks: (() => void)[] = [];
+  const envCallbacks: ((configTemplate?: string) => void)[] = [];
 
   for (const envName of envList) {
     logger.info(`Creating ${envName} environment...`);
