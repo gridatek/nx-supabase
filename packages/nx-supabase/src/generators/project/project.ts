@@ -4,6 +4,9 @@ import {
   Tree,
   logger,
 } from '@nx/devkit';
+import { execSync } from 'child_process';
+import { existsSync, readFileSync, rmSync } from 'fs';
+import { join } from 'path';
 import { ProjectGeneratorSchema } from './schema';
 import { environmentGenerator } from '../environment/environment';
 
@@ -118,9 +121,32 @@ nx g @gridatek/nx-supabase:environment --project=${options.name} --name=producti
 
   // Return combined callback
   return () => {
-    // Run all environment generator callbacks to create configs
+    logger.info('Generating config template from supabase init...');
+
+    let configTemplate: string | undefined;
+
+    try {
+      // Run supabase init once to get the config template
+      execSync('npx supabase init', {
+        cwd: tree.root,
+        stdio: 'pipe'
+      });
+
+      const generatedConfigPath = join(tree.root, 'supabase', 'config.toml');
+
+      if (existsSync(generatedConfigPath)) {
+        configTemplate = readFileSync(generatedConfigPath, 'utf-8');
+        rmSync(join(tree.root, 'supabase'), { recursive: true, force: true });
+      } else {
+        logger.warn('Could not find generated config.toml');
+      }
+    } catch {
+      logger.warn('Failed to run supabase init, will fallback to individual runs');
+    }
+
+    // Run all environment generator callbacks with the shared config template
     for (const callback of envCallbacks) {
-      callback();
+      callback(configTemplate);
     }
 
     logger.info('');

@@ -32,36 +32,49 @@ export async function environmentGenerator(
   await formatFiles(tree);
 
   // Return callback to generate config.toml
-  return () => {
-    logger.info('Generating config.toml from supabase init...');
-
+  return (configTemplate?: string) => {
     const absoluteProjectRoot = join(tree.root, projectRoot);
 
+    // If config template is provided, use it directly (faster)
+    const template = configTemplate || options.configTemplate;
+    if (template) {
+      const projectNameWithEnv = `${options.project}-${options.name}`;
+      const configContent = template.replace(
+        /project_id = "[^"]*"/,
+        `project_id = "${projectNameWithEnv}"`
+      );
+
+      const envConfigPath = join(absoluteProjectRoot, options.name, 'config.toml');
+      writeFileSync(envConfigPath, configContent, 'utf-8');
+
+      logger.info(`✅ Environment '${options.name}' created successfully!`);
+      logger.info(`   Project ID: ${projectNameWithEnv}`);
+      return;
+    }
+
+    // Fallback: Run supabase init (slower, for standalone environment creation)
+    logger.info('Generating config.toml from supabase init...');
+
     try {
-      // Run supabase init to get default config
       execSync('npx supabase init', {
         cwd: tree.root,
         stdio: 'pipe'
       });
 
-      // Read the generated config.toml
       const generatedConfigPath = join(tree.root, 'supabase', 'config.toml');
 
       if (existsSync(generatedConfigPath)) {
         let configContent = readFileSync(generatedConfigPath, 'utf-8');
 
-        // Update project_id to projectname-env format
         const projectNameWithEnv = `${options.project}-${options.name}`;
         configContent = configContent.replace(
           /project_id = "[^"]*"/,
           `project_id = "${projectNameWithEnv}"`
         );
 
-        // Write to environment config.toml using fs (not tree, since this is a callback)
         const envConfigPath = join(absoluteProjectRoot, options.name, 'config.toml');
         writeFileSync(envConfigPath, configContent, 'utf-8');
 
-        // Clean up the supabase directory created by init
         rmSync(join(tree.root, 'supabase'), { recursive: true, force: true });
 
         logger.info(`✅ Environment '${options.name}' created successfully!`);
