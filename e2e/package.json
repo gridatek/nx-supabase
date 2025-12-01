@@ -10,7 +10,6 @@
       "@gridatek/nx-supabase"
     ],
     "targets": {
-      "test": null,
       "e2e": {
         "executor": "@nx/jest:jest",
         "outputs": [

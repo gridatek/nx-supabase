@@ -5,6 +5,9 @@
   "references": [
     {
       "path": "./packages/nx-supabase"
+    },
+    {
+      "path": "./e2e"
     }
   ]
 }
