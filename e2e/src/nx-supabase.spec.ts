@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import { join, dirname } from 'path';
 import { mkdirSync, rmSync, existsSync } from 'fs';
 
@@ -190,6 +190,81 @@ describe('@gridatek/nx-supabase', () => {
       expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
       expect(existsSync(join(projectPath, '.generated', 'production', 'config.toml'))).toBe(true);
     });
+  });
+
+  // Only run start/stop tests in CI environment
+  (process.env.CI ? describe : describe.skip)('start and stop executors', () => {
+    it('should start and stop Supabase', () => {
+      const projectName = 'start-stop-test-project';
+
+      // Create a project with local environment
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=local`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Run build to prepare .generated directory
+      execSync(
+        `npx nx run ${projectName}:build`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Verify .generated directory was created
+      expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+
+      // Start Supabase in background (use timeout to prevent hanging)
+      const startProcess = spawn(
+        'npx',
+        ['nx', 'run', `${projectName}:start`, '--env=local'],
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          shell: true,
+          env: process.env,
+        }
+      );
+
+      // Wait for Supabase to start (give it 60 seconds)
+      const startTimeout = setTimeout(() => {
+        startProcess.kill();
+      }, 60000);
+
+      return new Promise<void>((resolve, reject) => {
+        startProcess.on('exit', (code) => {
+          clearTimeout(startTimeout);
+
+          if (code === 0) {
+            // Successfully started, now stop it
+            execSync(
+              `npx nx run ${projectName}:stop`,
+              {
+                cwd: projectDirectory,
+                stdio: 'inherit',
+                env: process.env,
+              }
+            );
+            resolve();
+          } else {
+            reject(new Error(`Start failed with code ${code}`));
+          }
+        });
+
+        startProcess.on('error', (error) => {
+          clearTimeout(startTimeout);
+          reject(error);
+        });
+      });
+    }, 120000); // 2 minute timeout for this test
   });
 });
 

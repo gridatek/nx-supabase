@@ -1,1 +1,3 @@
-export interface StartExecutorSchema {} // eslint-disable-line
+export interface StartExecutorSchema {
+  env: string;
+}

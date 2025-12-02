@@ -2,8 +2,13 @@
   "$schema": "https://json-schema.org/schema",
   "version": 2,
   "title": "Start executor",
-  "description": "",
+  "description": "Starts Supabase for a specific environment",
   "type": "object",
-  "properties": {},
-  "required": []
+  "properties": {
+    "env": {
+      "type": "string",
+      "description": "Environment to start (e.g., local, staging, production)"
+    }
+  },
+  "required": ["env"]
 }
