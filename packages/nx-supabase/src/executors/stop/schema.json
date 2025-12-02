@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/schema",
-  "version": 2,
-  "title": "Stop executor",
-  "description": "Stops the running Supabase instance",
-  "type": "object",
-  "properties": {},
-  "required": []
-}

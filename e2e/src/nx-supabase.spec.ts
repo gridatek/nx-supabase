@@ -193,9 +193,9 @@ describe('@gridatek/nx-supabase', () => {
   });
 
   // Only run start/stop tests in CI environment
-  (process.env.CI ? describe : describe.skip)('start and stop executors', () => {
+  (process.env.CI ? describe : describe.skip)('supabase executor', () => {
     it('should start and stop Supabase', () => {
-      const projectName = 'start-stop-test-project';
+      const projectName = 'supabase-executor-test-project';
 
       // Create a project with local environment
       execSync(
@@ -225,7 +225,7 @@ describe('@gridatek/nx-supabase', () => {
       // Start Supabase in background (use timeout to prevent hanging)
       const startProcess = spawn(
         'npx',
-        ['nx', 'run', `${projectName}:start`, '--env=local'],
+        ['nx', 'run', `${projectName}:supabase`, '--env=local', '--command=start'],
         {
           cwd: projectDirectory,
           stdio: 'inherit',
@@ -246,7 +246,7 @@ describe('@gridatek/nx-supabase', () => {
           if (code === 0) {
             // Successfully started, now stop it
             execSync(
-              `npx nx run ${projectName}:stop`,
+              `npx nx run ${projectName}:supabase --command=stop`,
               {
                 cwd: projectDirectory,
                 stdio: 'inherit',
