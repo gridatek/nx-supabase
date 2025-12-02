@@ -63,11 +63,26 @@ describe('project generator', () => {
     expect(tree.exists('apps/test/common/migrations/.gitkeep')).toBeTruthy();
   });
 
-  it('should configure build and supabase targets', async () => {
+  it('should configure build, start, stop, and supabase targets', async () => {
     await projectGenerator(tree, options);
     const config = readProjectConfiguration(tree, 'test');
+
+    // Check build target
     expect(config.targets?.build).toBeDefined();
     expect(config.targets?.build?.executor).toBe('@gridatek/nx-supabase:build');
+
+    // Check start target (uses supabase executor with command: 'start')
+    expect(config.targets?.start).toBeDefined();
+    expect(config.targets?.start?.executor).toBe('@gridatek/nx-supabase:supabase');
+    expect(config.targets?.start?.options?.command).toBe('start');
+    expect(config.targets?.start?.dependsOn).toEqual(['build']);
+
+    // Check stop target (uses supabase executor with command: 'stop')
+    expect(config.targets?.stop).toBeDefined();
+    expect(config.targets?.stop?.executor).toBe('@gridatek/nx-supabase:supabase');
+    expect(config.targets?.stop?.options?.command).toBe('stop');
+
+    // Check generic supabase target
     expect(config.targets?.supabase).toBeDefined();
     expect(config.targets?.supabase?.executor).toBe('@gridatek/nx-supabase:supabase');
   });

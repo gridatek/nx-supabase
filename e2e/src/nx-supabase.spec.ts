@@ -193,9 +193,9 @@ describe('@gridatek/nx-supabase', () => {
   });
 
   // Only run start/stop tests in CI environment
-  (process.env.CI ? describe : describe.skip)('supabase executor', () => {
-    it('should start and stop Supabase', () => {
-      const projectName = 'supabase-executor-test-project';
+  (process.env.CI ? describe : describe.skip)('start and stop executors', () => {
+    it('should start and stop Supabase using convenient shortcuts', () => {
+      const projectName = 'start-stop-test-project';
 
       // Create a project with local environment
       execSync(
@@ -209,23 +209,12 @@ describe('@gridatek/nx-supabase', () => {
 
       const projectPath = join(projectDirectory, projectName);
 
-      // Run build to prepare .generated directory
-      execSync(
-        `npx nx run ${projectName}:build`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      // Verify .generated directory was created
-      expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
-
+      // Verify .generated directory will be created by start target (depends on build)
       // Start Supabase in background (use timeout to prevent hanging)
+      // The start target automatically runs build first
       const startProcess = spawn(
         'npx',
-        ['nx', 'run', `${projectName}:supabase`, '--env=local', '--command=start'],
+        ['nx', 'run', `${projectName}:start`],
         {
           cwd: projectDirectory,
           stdio: 'inherit',
@@ -244,9 +233,12 @@ describe('@gridatek/nx-supabase', () => {
           clearTimeout(startTimeout);
 
           if (code === 0) {
-            // Successfully started, now stop it
+            // Verify .generated directory was created
+            expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+
+            // Successfully started, now stop it using the convenient shortcut
             execSync(
-              `npx nx run ${projectName}:supabase --command=stop`,
+              `npx nx run ${projectName}:stop`,
               {
                 cwd: projectDirectory,
                 stdio: 'inherit',
