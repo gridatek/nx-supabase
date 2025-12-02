@@ -9,8 +9,8 @@ describe('@gridatek/nx-supabase', () => {
     projectDirectory = createTestProject();
 
     // The plugin has been built and published to a local registry in the jest globalSetup
-    // Install the plugin built with the latest source code into the test repo
-    execSync(`npm install -D @gridatek/nx-supabase@e2e`, {
+    // Use nx add to install the plugin and run the init generator (tests the real user flow)
+    execSync(`npx nx add @gridatek/nx-supabase@e2e`, {
       cwd: projectDirectory,
       stdio: 'inherit',
       env: process.env,
@@ -35,14 +35,9 @@ describe('@gridatek/nx-supabase', () => {
     });
   });
 
-  describe('init generator', () => {
-    it('should add supabase CLI to devDependencies', () => {
-      execSync('npx nx g @gridatek/nx-supabase:init', {
-        cwd: projectDirectory,
-        stdio: 'inherit',
-        env: process.env,
-      });
-
+  describe('init generator (via nx add)', () => {
+    it('should have added supabase CLI to devDependencies', () => {
+      // The init generator should have already run via nx add in beforeAll
       // Verify package.json was updated
       const packageJsonPath = join(projectDirectory, 'package.json');
       expect(existsSync(packageJsonPath)).toBe(true);
