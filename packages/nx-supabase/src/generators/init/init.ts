@@ -40,7 +40,7 @@ export async function initGenerator(
     logger.info('');
     logger.info('Next steps:');
     logger.info('  1. Create a Supabase project: nx g @gridatek/nx-supabase:project my-project');
-    logger.info('  2. Start Supabase: nx start my-project --env=local');
+    logger.info('  2. Start Supabase: nx run my-project:start --env=local');
     logger.info('');
   };
 }

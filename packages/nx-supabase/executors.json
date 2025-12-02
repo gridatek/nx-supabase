@@ -9,6 +9,11 @@
       "implementation": "./dist/executors/stop/stop",
       "schema": "./dist/executors/stop/schema.json",
       "description": "stop executor"
+    },
+    "build": {
+      "implementation": "./dist/executors/build/build",
+      "schema": "./dist/executors/build/schema.json",
+      "description": "build executor"
     }
   }
 }

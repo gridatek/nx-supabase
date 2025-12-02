@@ -155,6 +155,42 @@ describe('@gridatek/nx-supabase', () => {
       expect(existsSync(join(envPath, 'seeds'))).toBe(true);
     });
   });
+
+  describe('build executor', () => {
+    it('should build common and environment-specific files', () => {
+      const projectName = 'build-test-project';
+
+      // Create a project with multiple environments
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=local,production`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Run the build executor
+      execSync(
+        `npx nx run ${projectName}:build`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Verify .generated directories were created for each environment
+      expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
+
+      // Verify config.toml files were built (these are the actual files that get created)
+      expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production', 'config.toml'))).toBe(true);
+    });
+  });
 });
 
 /**

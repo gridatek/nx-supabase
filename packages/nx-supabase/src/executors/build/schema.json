@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Build executor",
+  "description": "Builds environment-specific Supabase configurations by merging common and environment-specific files into .generated directory",
+  "type": "object",
+  "properties": {},
+  "required": []
+}
