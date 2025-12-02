@@ -20,22 +20,22 @@ const runExecutor = async (
   }
 
   const projectRoot = join(context.root, projectConfig.root);
-  const commonDir = join(projectRoot, 'common');
+  const defaultDir = join(projectRoot, 'default');
   const generatedDir = join(projectRoot, '.generated');
 
-  // Check if common directory exists
-  if (!existsSync(commonDir)) {
-    logger.error(`Common directory not found at ${commonDir}`);
+  // Check if default directory exists
+  if (!existsSync(defaultDir)) {
+    logger.error(`Default directory not found at ${defaultDir}`);
     return { success: false };
   }
 
-  // Find all environment directories (exclude common and .generated)
+  // Find all environment directories (exclude default and .generated)
   const entries = readdirSync(projectRoot, { withFileTypes: true });
   const envDirs = entries
     .filter(
       (entry) =>
         entry.isDirectory() &&
-        entry.name !== 'common' &&
+        entry.name !== 'default' &&
         entry.name !== '.generated' &&
         !entry.name.startsWith('.')
     )
@@ -61,10 +61,10 @@ const runExecutor = async (
     }
     mkdirSync(envGeneratedDir, { recursive: true });
 
-    // Copy common files first
-    syncDirectory(commonDir, envGeneratedDir);
+    // Copy default files first
+    syncDirectory(defaultDir, envGeneratedDir);
 
-    // Copy environment-specific files (overwrites common files if they exist)
+    // Copy environment-specific files (overwrites default files if they exist)
     syncDirectory(envDir, envGeneratedDir);
 
     logger.info(`✓ Built ${env} to .generated/${env}`);

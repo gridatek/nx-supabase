@@ -21,16 +21,16 @@ describe('Build Executor', () => {
 
     // Create test project structure
     const projectRoot = join(testRoot, 'test-project');
-    mkdirSync(join(projectRoot, 'common', 'migrations'), { recursive: true });
-    mkdirSync(join(projectRoot, 'common', 'seeds'), { recursive: true });
+    mkdirSync(join(projectRoot, 'default', 'migrations'), { recursive: true });
+    mkdirSync(join(projectRoot, 'default', 'seeds'), { recursive: true });
     mkdirSync(join(projectRoot, 'local', 'migrations'), { recursive: true });
     mkdirSync(join(projectRoot, 'local', 'seeds'), { recursive: true });
     mkdirSync(join(projectRoot, 'production', 'migrations'), { recursive: true });
 
-    // Create common files
-    writeFileSync(join(projectRoot, 'common', 'config.toml'), 'common config');
-    writeFileSync(join(projectRoot, 'common', 'migrations', '001_init.sql'), 'common migration');
-    writeFileSync(join(projectRoot, 'common', 'seeds', 'data.sql'), 'common seed');
+    // Create default files
+    writeFileSync(join(projectRoot, 'default', 'config.toml'), 'default config');
+    writeFileSync(join(projectRoot, 'default', 'migrations', '001_init.sql'), 'default migration');
+    writeFileSync(join(projectRoot, 'default', 'seeds', 'data.sql'), 'default seed');
 
     // Create environment-specific files
     writeFileSync(join(projectRoot, 'local', 'config.toml'), 'local config');
@@ -78,24 +78,24 @@ describe('Build Executor', () => {
     expect(existsSync(join(projectRoot, '.generated', 'production'))).toBe(true);
   });
 
-  it('should merge common files with environment files', async () => {
+  it('should merge default files with environment files', async () => {
     const output = await executor(options, context);
     expect(output.success).toBe(true);
 
     const projectRoot = join(testRoot, 'test-project');
 
-    // Check local environment has both common and local files
+    // Check local environment has both default and local files
     const localConfig = readFileSync(join(projectRoot, '.generated', 'local', 'config.toml'), 'utf-8');
-    expect(localConfig).toBe('local config'); // Environment-specific overrides common
+    expect(localConfig).toBe('local config'); // Environment-specific overrides default
 
-    const commonMigration = readFileSync(join(projectRoot, '.generated', 'local', 'migrations', '001_init.sql'), 'utf-8');
-    expect(commonMigration).toBe('common migration');
+    const defaultMigration = readFileSync(join(projectRoot, '.generated', 'local', 'migrations', '001_init.sql'), 'utf-8');
+    expect(defaultMigration).toBe('default migration');
 
     const localMigration = readFileSync(join(projectRoot, '.generated', 'local', 'migrations', '002_local.sql'), 'utf-8');
     expect(localMigration).toBe('local migration');
 
-    const commonSeed = readFileSync(join(projectRoot, '.generated', 'local', 'seeds', 'data.sql'), 'utf-8');
-    expect(commonSeed).toBe('common seed');
+    const defaultSeed = readFileSync(join(projectRoot, '.generated', 'local', 'seeds', 'data.sql'), 'utf-8');
+    expect(defaultSeed).toBe('default seed');
   });
 
   it('should handle production environment correctly', async () => {
@@ -111,13 +111,13 @@ describe('Build Executor', () => {
     const prodMigration = readFileSync(join(projectRoot, '.generated', 'production', 'migrations', '002_prod.sql'), 'utf-8');
     expect(prodMigration).toBe('prod migration');
 
-    // Common files should also be present
+    // Default files should also be present
     expect(existsSync(join(projectRoot, '.generated', 'production', 'migrations', '001_init.sql'))).toBe(true);
   });
 
   it('should skip .gitkeep files', async () => {
     const projectRoot = join(testRoot, 'test-project');
-    writeFileSync(join(projectRoot, 'common', 'migrations', '.gitkeep'), '');
+    writeFileSync(join(projectRoot, 'default', 'migrations', '.gitkeep'), '');
     writeFileSync(join(projectRoot, 'local', 'migrations', '.gitkeep'), '');
 
     const output = await executor(options, context);
@@ -144,9 +144,9 @@ describe('Build Executor', () => {
     expect(existsSync(join(projectRoot, '.generated', 'local', 'config.toml'))).toBe(true);
   });
 
-  it('should fail if common directory does not exist', async () => {
+  it('should fail if default directory does not exist', async () => {
     const projectRoot = join(testRoot, 'test-project');
-    rmSync(join(projectRoot, 'common'), { recursive: true, force: true });
+    rmSync(join(projectRoot, 'default'), { recursive: true, force: true });
 
     const output = await executor(options, context);
     expect(output.success).toBe(false);

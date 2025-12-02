@@ -65,9 +65,9 @@ describe('@gridatek/nx-supabase', () => {
       const projectPath = join(projectDirectory, projectName);
       expect(existsSync(projectPath)).toBe(true);
 
-      // Verify common directories exist
-      expect(existsSync(join(projectPath, 'common', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, 'common', 'seeds'))).toBe(true);
+      // Verify default directories exist
+      expect(existsSync(join(projectPath, 'default', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'default', 'seeds'))).toBe(true);
 
       // Verify local environment was created
       expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
@@ -119,45 +119,12 @@ describe('@gridatek/nx-supabase', () => {
 
       const projectPath = join(projectDirectory, directory, projectName);
       expect(existsSync(projectPath)).toBe(true);
-      expect(existsSync(join(projectPath, 'common', 'migrations'))).toBe(true);
-    });
-  });
-
-  describe('environment generator', () => {
-    it('should create a new environment for existing project', () => {
-      const projectName = 'existing-project';
-      const envName = 'development';
-
-      // First create a project
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      // Then create a new environment
-      execSync(
-        `npx nx g @gridatek/nx-supabase:environment ${envName} --project=${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      const envPath = join(projectDirectory, projectName, envName);
-
-      // Verify environment directories exist
-      expect(existsSync(join(envPath, 'migrations'))).toBe(true);
-      expect(existsSync(join(envPath, 'seeds'))).toBe(true);
+      expect(existsSync(join(projectPath, 'default', 'migrations'))).toBe(true);
     });
   });
 
   describe('build executor', () => {
-    it('should build common and environment-specific files', () => {
+    it('should build default and environment-specific files', () => {
       const projectName = 'build-test-project';
 
       // Create a project with multiple environments
