@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "Init",
+  "title": "Initialize Supabase plugin",
+  "type": "object",
+  "properties": {
+    "skipPackageJson": {
+      "type": "boolean",
+      "description": "Skip adding Supabase CLI to package.json",
+      "default": false
+    }
+  }
+}
