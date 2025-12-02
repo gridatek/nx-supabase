@@ -77,10 +77,10 @@ describe('project generator', () => {
     expect(config.targets?.start?.options?.command).toBe('start');
     expect(config.targets?.start?.dependsOn).toEqual(['build']);
 
-    // Check stop target (uses run-command executor with command: 'stop')
+    // Check stop target (uses run-command executor with command: 'stop --no-backup')
     expect(config.targets?.stop).toBeDefined();
     expect(config.targets?.stop?.executor).toBe('@gridatek/nx-supabase:run-command');
-    expect(config.targets?.stop?.options?.command).toBe('stop');
+    expect(config.targets?.stop?.options?.command).toBe('stop --no-backup');
 
     // Check generic supabase target
     expect(config.targets?.supabase).toBeDefined();

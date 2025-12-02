@@ -39,7 +39,7 @@ export async function projectGenerator(
       stop: {
         executor: '@gridatek/nx-supabase:run-command',
         options: {
-          command: 'stop',
+          command: 'stop --no-backup',
         },
       },
       supabase: {
