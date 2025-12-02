@@ -155,6 +155,44 @@ describe('@gridatek/nx-supabase', () => {
       expect(existsSync(join(envPath, 'seeds'))).toBe(true);
     });
   });
+
+  describe('sync executor', () => {
+    it('should sync common and environment-specific files', () => {
+      const projectName = 'sync-test-project';
+
+      // Create a project with multiple environments
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=local,production`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Run the sync executor
+      execSync(
+        `npx nx sync ${projectName}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Verify .generated directories were created for each environment
+      expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
+
+      // Verify common structure is present in .generated directories
+      expect(existsSync(join(projectPath, '.generated', 'local', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'local', 'seeds'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production', 'seeds'))).toBe(true);
+    });
+  });
 });
 
 /**
