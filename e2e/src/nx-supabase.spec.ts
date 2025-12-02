@@ -35,6 +35,24 @@ describe('@gridatek/nx-supabase', () => {
     });
   });
 
+  describe('init generator', () => {
+    it('should add supabase CLI to devDependencies', () => {
+      execSync('npx nx g @gridatek/nx-supabase:init', {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
+
+      // Verify package.json was updated
+      const packageJsonPath = join(projectDirectory, 'package.json');
+      expect(existsSync(packageJsonPath)).toBe(true);
+
+      const packageJson = require(packageJsonPath);
+      expect(packageJson.devDependencies['supabase']).toBeDefined();
+      expect(packageJson.devDependencies['supabase']).toBe('^2.0.0');
+    });
+  });
+
   describe('project generator', () => {
     it('should create a Supabase project with default local environment', () => {
       const projectName = 'my-supabase';
