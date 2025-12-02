@@ -2,7 +2,6 @@ import {
   CreateNodesV2,
   CreateNodesContextV2,
   CreateNodesResultV2,
-  ProjectConfiguration,
   TargetConfiguration,
 } from '@nx/devkit';
 import { dirname } from 'path';
