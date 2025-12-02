@@ -2,31 +2,26 @@ import { ExecutorContext } from '@nx/devkit';
 import { RunCommandExecutorSchema } from './schema';
 import executor from './run-command';
 import { join } from 'path';
-import { vi, beforeEach, describe, it, expect } from 'vitest';
+import { vi, beforeEach, describe, it, expect, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as child_process from 'child_process';
 
-// Mock fs module
-vi.mock('fs');
-
-// Mock child_process
-vi.mock('child_process');
-
 describe('Supabase Executor', () => {
   let context: ExecutorContext;
+  let existsSyncSpy: ReturnType<typeof vi.spyOn>;
+  let spawnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Spy on fs.existsSync
+    existsSyncSpy = vi.spyOn(fs, 'existsSync').mockReturnValue(true);
 
-    // Mock existsSync
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-
-    // Mock spawn
-    vi.mocked(child_process.spawn).mockReturnValue({
+    // Spy on child_process.spawn
+    spawnSpy = vi.spyOn(child_process, 'spawn').mockReturnValue({
       on: vi.fn((event: string, callback: (code: number) => void) => {
         if (event === 'exit') {
-          callback(0);
+          setTimeout(() => callback(0), 0);
         }
+        return this;
       }),
     } as any);
 
@@ -51,6 +46,10 @@ describe('Supabase Executor', () => {
     };
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('should use local as default environment', async () => {
     const options: RunCommandExecutorSchema = {
       command: 'supabase start',
@@ -59,7 +58,7 @@ describe('Supabase Executor', () => {
     const output = await executor(options, context);
 
     // Should check for .generated/local directory (default env)
-    expect(fs.existsSync).toHaveBeenCalledWith(
+    expect(existsSyncSpy).toHaveBeenCalledWith(
       join('/workspace', 'apps/test-project', '.generated', 'local')
     );
     expect(output.success).toBe(true);
@@ -74,7 +73,7 @@ describe('Supabase Executor', () => {
     const output = await executor(options, context);
 
     // Should check for .generated/production directory
-    expect(fs.existsSync).toHaveBeenCalledWith(
+    expect(existsSyncSpy).toHaveBeenCalledWith(
       join('/workspace', 'apps/test-project', '.generated', 'production')
     );
     expect(output.success).toBe(true);
@@ -94,7 +93,7 @@ describe('Supabase Executor', () => {
       command: 'supabase start',
     };
 
-    vi.mocked(fs.existsSync).mockReturnValue(false);
+    existsSyncSpy.mockReturnValue(false);
 
     const output = await executor(options, context);
     expect(output.success).toBe(false);
