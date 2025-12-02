@@ -42,7 +42,7 @@ export async function projectGenerator(
           command: 'supabase stop --no-backup',
         },
       },
-      supabase: {
+      'run-command': {
         executor: '@gridatek/nx-supabase:run-command',
       },
     },
@@ -112,13 +112,13 @@ nx run ${options.name}:stop
 Run other Supabase commands:
 \`\`\`bash
 # Check status
-nx run ${options.name}:supabase --command="supabase status"
+nx run ${options.name}:run-command --command="supabase status"
 
 # Create migration
-nx run ${options.name}:supabase --command="supabase migration new my_table"
+nx run ${options.name}:run-command --command="supabase migration new my_table"
 
 # Run any Supabase CLI command
-nx run ${options.name}:supabase --env=local --command="supabase db reset"
+nx run ${options.name}:run-command --env=local --command="supabase db reset"
 \`\`\`
 
 Create additional environments:
@@ -194,7 +194,7 @@ nx g @gridatek/nx-supabase:environment --project=${options.name} --name=producti
     logger.info('');
     logger.info('Other commands:');
     logger.info(`  Stop: nx run ${options.name}:stop`);
-    logger.info(`  Status: nx run ${options.name}:supabase --command="supabase status"`);
+    logger.info(`  Status: nx run ${options.name}:run-command --command="supabase status"`);
   };
 }
 

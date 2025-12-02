@@ -63,7 +63,7 @@ describe('project generator', () => {
     expect(tree.exists('apps/test/common/migrations/.gitkeep')).toBeTruthy();
   });
 
-  it('should configure build, start, stop, and supabase targets', async () => {
+  it('should configure build, start, stop, and run-command targets', async () => {
     await projectGenerator(tree, options);
     const config = readProjectConfiguration(tree, 'test');
 
@@ -82,9 +82,9 @@ describe('project generator', () => {
     expect(config.targets?.stop?.executor).toBe('@gridatek/nx-supabase:run-command');
     expect(config.targets?.stop?.options?.command).toBe('supabase stop --no-backup');
 
-    // Check generic supabase target
-    expect(config.targets?.supabase).toBeDefined();
-    expect(config.targets?.supabase?.executor).toBe('@gridatek/nx-supabase:run-command');
+    // Check generic run-command target
+    expect(config.targets?.['run-command']).toBeDefined();
+    expect(config.targets?.['run-command']?.executor).toBe('@gridatek/nx-supabase:run-command');
   });
 
   it('should create default local environment', async () => {
