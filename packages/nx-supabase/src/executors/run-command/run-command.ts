@@ -51,14 +51,14 @@ const runExecutor = async (
   }
 
   cwd = envGeneratedDir;
-  logger.info(`Running Supabase command for ${projectName} (${env})...`);
+  logger.info(`Running command for ${projectName} (${env})...`);
   logger.info(`Using config: ${configPath}`);
 
-  logger.info(`Command: supabase ${commandString}`);
+  logger.info(`Command: ${commandString}`);
   logger.info('');
 
   return new Promise((resolve) => {
-    const supabase = spawn('npx', ['supabase', ...commandArgs], {
+    const supabase = spawn('npx', commandArgs, {
       cwd,
       stdio: 'inherit',
       shell: true,

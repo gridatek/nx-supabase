@@ -54,7 +54,7 @@ describe('Supabase Executor', () => {
 
   it('should use local as default environment', async () => {
     const options: RunCommandExecutorSchema = {
-      command: 'start',
+      command: 'supabase start',
     };
 
     mockExistsSync.mockReturnValue(true);
@@ -71,7 +71,7 @@ describe('Supabase Executor', () => {
   it('should use specified environment', async () => {
     const options: RunCommandExecutorSchema = {
       env: 'production',
-      command: 'start',
+      command: 'supabase start',
     };
 
     mockExistsSync.mockReturnValue(true);
@@ -87,7 +87,7 @@ describe('Supabase Executor', () => {
 
   it('should handle array commands', async () => {
     const options: RunCommandExecutorSchema = {
-      command: ['migration', 'new', 'my_table'],
+      command: ['supabase', 'migration', 'new', 'my_table'],
     };
 
     mockExistsSync.mockReturnValue(true);
@@ -98,7 +98,7 @@ describe('Supabase Executor', () => {
 
   it('should fail if environment directory does not exist', async () => {
     const options: RunCommandExecutorSchema = {
-      command: 'start',
+      command: 'supabase start',
     };
 
     mockExistsSync.mockReturnValue(false);

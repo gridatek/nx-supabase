@@ -22,7 +22,7 @@
           }
         }
       ],
-      "description": "Supabase command to run (e.g., 'start', 'stop', ['migration', 'new', 'my_table'])"
+      "description": "Full command to run (e.g., 'supabase start', 'supabase stop', ['supabase', 'migration', 'new', 'my_table'])"
     }
   },
   "required": ["command"]
