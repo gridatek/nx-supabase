@@ -20,31 +20,12 @@ export async function projectGenerator(
   logger.info(`Creating Supabase project at ${projectRoot}...`);
 
   // Add Nx project configuration
+  // Note: targets (build, start, stop, run-command) are automatically inferred
+  // by the plugin when it detects default/config.toml
   addProjectConfiguration(tree, options.name, {
     root: projectRoot,
     projectType: 'application',
     sourceRoot: `${projectRoot}`,
-    targets: {
-      build: {
-        executor: '@gridatek/nx-supabase:build',
-      },
-      start: {
-        executor: '@gridatek/nx-supabase:run-command',
-        options: {
-          command: 'supabase start',
-        },
-        dependsOn: ['build'],
-      },
-      stop: {
-        executor: '@gridatek/nx-supabase:run-command',
-        options: {
-          command: 'supabase stop --no-backup',
-        },
-      },
-      'run-command': {
-        executor: '@gridatek/nx-supabase:run-command',
-      },
-    },
   });
 
   // Create default directory structure
