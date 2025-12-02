@@ -9,20 +9,20 @@ import * as child_process from 'child_process';
 describe('Supabase Executor', () => {
   let context: ExecutorContext;
   let existsSyncSpy: ReturnType<typeof vi.spyOn>;
-  let spawnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     // Spy on fs.existsSync
     existsSyncSpy = vi.spyOn(fs, 'existsSync').mockReturnValue(true);
 
     // Spy on child_process.spawn
-    spawnSpy = vi.spyOn(child_process, 'spawn').mockReturnValue({
+    vi.spyOn(child_process, 'spawn').mockReturnValue({
       on: vi.fn((event: string, callback: (code: number) => void) => {
         if (event === 'exit') {
           setTimeout(() => callback(0), 0);
         }
         return this;
       }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     context = {
