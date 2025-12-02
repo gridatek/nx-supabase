@@ -71,20 +71,20 @@ describe('project generator', () => {
     expect(config.targets?.build).toBeDefined();
     expect(config.targets?.build?.executor).toBe('@gridatek/nx-supabase:build');
 
-    // Check start target (uses supabase executor with command: 'start')
+    // Check start target (uses run-command executor with command: 'start')
     expect(config.targets?.start).toBeDefined();
-    expect(config.targets?.start?.executor).toBe('@gridatek/nx-supabase:supabase');
+    expect(config.targets?.start?.executor).toBe('@gridatek/nx-supabase:run-command');
     expect(config.targets?.start?.options?.command).toBe('start');
     expect(config.targets?.start?.dependsOn).toEqual(['build']);
 
-    // Check stop target (uses supabase executor with command: 'stop')
+    // Check stop target (uses run-command executor with command: 'stop')
     expect(config.targets?.stop).toBeDefined();
-    expect(config.targets?.stop?.executor).toBe('@gridatek/nx-supabase:supabase');
+    expect(config.targets?.stop?.executor).toBe('@gridatek/nx-supabase:run-command');
     expect(config.targets?.stop?.options?.command).toBe('stop');
 
     // Check generic supabase target
     expect(config.targets?.supabase).toBeDefined();
-    expect(config.targets?.supabase?.executor).toBe('@gridatek/nx-supabase:supabase');
+    expect(config.targets?.supabase?.executor).toBe('@gridatek/nx-supabase:run-command');
   });
 
   it('should create default local environment', async () => {

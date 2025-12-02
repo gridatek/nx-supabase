@@ -1,18 +1,21 @@
 import { ExecutorContext } from '@nx/devkit';
-import { SupabaseExecutorSchema } from './schema';
-import executor from './supabase';
+import { RunCommandExecutorSchema } from './schema';
+import executor from './run-command';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { vi } from 'vitest';
 
 // Mock fs module
-jest.mock('fs', () => ({
-  existsSync: jest.fn(),
+vi.mock('fs', () => ({
+  default: {},
+  existsSync: vi.fn(),
 }));
 
 // Mock child_process
-jest.mock('child_process', () => ({
-  spawn: jest.fn(() => ({
-    on: jest.fn((event, callback) => {
+vi.mock('child_process', () => ({
+  default: {},
+  spawn: vi.fn(() => ({
+    on: vi.fn((event, callback) => {
       if (event === 'exit') {
         callback(0);
       }
@@ -20,13 +23,13 @@ jest.mock('child_process', () => ({
   })),
 }));
 
-const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
+const mockExistsSync = existsSync as ReturnType<typeof vi.fn>;
 
 describe('Supabase Executor', () => {
   let context: ExecutorContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     context = {
       root: '/workspace',
@@ -50,7 +53,7 @@ describe('Supabase Executor', () => {
   });
 
   it('should use local as default environment', async () => {
-    const options: SupabaseExecutorSchema = {
+    const options: RunCommandExecutorSchema = {
       command: 'start',
     };
 
@@ -66,7 +69,7 @@ describe('Supabase Executor', () => {
   });
 
   it('should use specified environment', async () => {
-    const options: SupabaseExecutorSchema = {
+    const options: RunCommandExecutorSchema = {
       env: 'production',
       command: 'start',
     };
@@ -83,7 +86,7 @@ describe('Supabase Executor', () => {
   });
 
   it('should handle array commands', async () => {
-    const options: SupabaseExecutorSchema = {
+    const options: RunCommandExecutorSchema = {
       command: ['migration', 'new', 'my_table'],
     };
 
@@ -94,7 +97,7 @@ describe('Supabase Executor', () => {
   });
 
   it('should fail if environment directory does not exist', async () => {
-    const options: SupabaseExecutorSchema = {
+    const options: RunCommandExecutorSchema = {
       command: 'start',
     };
 

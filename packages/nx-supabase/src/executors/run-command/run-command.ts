@@ -2,10 +2,10 @@ import { ExecutorContext, logger } from '@nx/devkit';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { spawn } from 'child_process';
-import { SupabaseExecutorSchema } from './schema';
+import { RunCommandExecutorSchema } from './schema';
 
 const runExecutor = async (
-  options: SupabaseExecutorSchema,
+  options: RunCommandExecutorSchema,
   context: ExecutorContext
 ): Promise<{ success: boolean }> => {
   const projectName = context.projectName;

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/schema",
   "version": 2,
-  "title": "Supabase executor",
+  "title": "Run Command executor",
   "description": "Runs Supabase CLI commands for a specific environment",
   "type": "object",
   "properties": {

@@ -30,20 +30,20 @@ export async function projectGenerator(
         executor: '@gridatek/nx-supabase:build',
       },
       start: {
-        executor: '@gridatek/nx-supabase:supabase',
+        executor: '@gridatek/nx-supabase:run-command',
         options: {
           command: 'start',
         },
         dependsOn: ['build'],
       },
       stop: {
-        executor: '@gridatek/nx-supabase:supabase',
+        executor: '@gridatek/nx-supabase:run-command',
         options: {
           command: 'stop',
         },
       },
       supabase: {
-        executor: '@gridatek/nx-supabase:supabase',
+        executor: '@gridatek/nx-supabase:run-command',
       },
     },
   });

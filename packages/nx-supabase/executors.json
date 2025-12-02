@@ -1,9 +1,9 @@
 {
   "executors": {
-    "supabase": {
-      "implementation": "./dist/executors/supabase/supabase",
-      "schema": "./dist/executors/supabase/schema.json",
-      "description": "Runs Supabase CLI commands"
+    "run-command": {
+      "implementation": "./dist/executors/run-command/run-command",
+      "schema": "./dist/executors/run-command/schema.json",
+      "description": "Runs Supabase CLI commands for a specific environment"
     },
     "build": {
       "implementation": "./dist/executors/build/build",
