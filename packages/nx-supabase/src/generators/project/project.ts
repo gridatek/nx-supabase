@@ -166,7 +166,7 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
         logger.warn('Could not find generated config.toml');
         logger.warn('Please create config.toml manually in the default directory');
       }
-    } catch (error) {
+    } catch {
       logger.warn('Failed to run supabase init');
       logger.warn('Please create config.toml manually in the default directory');
     }

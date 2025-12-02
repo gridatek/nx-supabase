@@ -31,7 +31,7 @@ async function createNodesInternal(
   options: SupabasePluginOptions | undefined,
   context: CreateNodesContextV2
 ): Promise<CreateNodesResultV2> {
-  const projectsConfigurations: Record<string, ProjectConfiguration> = {};
+  const results: CreateNodesResultV2 = [];
 
   // Default target names (can be customized via options in nx.json)
   const buildTargetName = options?.buildTargetName ?? 'build';
@@ -100,13 +100,19 @@ async function createNodesInternal(
       },
     };
 
-    projectsConfigurations[projectRoot] = {
-      root: projectRoot,
-      targets,
-    };
+    // Add result for this config file
+    results.push([
+      configFile,
+      {
+        projects: {
+          [projectRoot]: {
+            root: projectRoot,
+            targets,
+          },
+        },
+      },
+    ]);
   }
 
-  return {
-    projects: projectsConfigurations,
-  };
+  return results;
 }

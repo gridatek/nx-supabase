@@ -50,13 +50,15 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     writeFileSync(join(defaultDir, 'config.toml'), 'project_id = "test"');
 
     const [, handler] = createNodesV2;
-    const result = await handler(
+    const results = await handler(
       [join(projectRoot, 'default', 'config.toml')],
       undefined,
       context
     );
 
     // Verify project was detected
+    expect(results).toHaveLength(1);
+    const [, result] = results[0];
     expect(result.projects).toHaveProperty(projectRoot);
     const project = result.projects[projectRoot];
 
@@ -94,14 +96,14 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     mkdirSync(join(defaultDir, 'migrations'), { recursive: true });
 
     const [, handler] = createNodesV2;
-    const result = await handler(
+    const results = await handler(
       [join(projectRoot, 'default', 'config.toml')],
       undefined,
       context
     );
 
     // Should not detect the project
-    expect(Object.keys(result.projects)).toHaveLength(0);
+    expect(results).toHaveLength(0);
   });
 
   it('should support custom target names from options', async () => {
@@ -120,12 +122,13 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     };
 
     const [, handler] = createNodesV2;
-    const result = await handler(
+    const results = await handler(
       [join(projectRoot, 'default', 'config.toml')],
       customOptions,
       context
     );
 
+    const [, result] = results[0];
     const project = result.projects[projectRoot];
 
     // Verify custom target names are used
@@ -149,12 +152,13 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     mkdirSync(join(tempDir, projectRoot, 'production'), { recursive: true });
 
     const [, handler] = createNodesV2;
-    const result = await handler(
+    const results = await handler(
       [join(projectRoot, 'default', 'config.toml')],
       undefined,
       context
     );
 
+    const [, result] = results[0];
     const project = result.projects[projectRoot];
 
     // Verify all environments are included in inputs
@@ -177,12 +181,13 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     mkdirSync(join(tempDir, projectRoot, 'local'), { recursive: true });
 
     const [, handler] = createNodesV2;
-    const result = await handler(
+    const results = await handler(
       [join(projectRoot, 'default', 'config.toml')],
       undefined,
       context
     );
 
+    const [, result] = results[0];
     const project = result.projects[projectRoot];
 
     // Verify only 'local' is included, not .generated or .git
