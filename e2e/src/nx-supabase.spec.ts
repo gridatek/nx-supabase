@@ -228,11 +228,15 @@ describe('@gridatek/nx-supabase', () => {
 
       try {
         // Wait for Supabase to be ready (poll status)
+        // In CI, Docker image pulls can take several minutes
         let isReady = false;
-        const maxAttempts = 30; // 30 attempts * 2 seconds = 60 seconds max
+        const maxAttempts = 60; // 60 attempts * 5 seconds = 5 minutes max
+        const pollInterval = 5000; // 5 seconds
+
+        console.log(`Waiting for Supabase to start (max ${maxAttempts * pollInterval / 1000} seconds)...`);
 
         for (let i = 0; i < maxAttempts; i++) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
 
           try {
             // Check if Supabase is running using status command
@@ -244,16 +248,21 @@ describe('@gridatek/nx-supabase', () => {
                 env: process.env,
               }
             );
+            console.log(`Supabase started successfully after ${(i + 1) * pollInterval / 1000} seconds`);
             isReady = true;
             break;
           } catch (error) {
             // Status check failed, Supabase not ready yet
+            if ((i + 1) % 6 === 0) {
+              // Log progress every 30 seconds
+              console.log(`Still waiting... (${(i + 1) * pollInterval / 1000}s elapsed)`);
+            }
             continue;
           }
         }
 
         if (!isReady) {
-          throw new Error('Supabase failed to start within 60 seconds');
+          throw new Error(`Supabase failed to start within ${maxAttempts * pollInterval / 1000} seconds`);
         }
 
         // Verify .generated directory was created
@@ -301,7 +310,7 @@ describe('@gridatek/nx-supabase', () => {
           // Ignore errors during cleanup
         }
       }
-    }, 120000); // 2 minute timeout for this test
+    }, 360000); // 6 minute timeout for this test (5 min for start + 1 min buffer)
   });
 });
 
