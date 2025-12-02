@@ -194,7 +194,7 @@ describe('@gridatek/nx-supabase', () => {
 
   // Only run start/stop tests in CI environment
   (process.env.CI ? describe : describe.skip)('start and stop executors', () => {
-    it('should start and stop Supabase using convenient shortcuts', () => {
+    it('should start and stop Supabase using convenient shortcuts', async () => {
       const projectName = 'start-stop-test-project';
 
       // Create a project with local environment
@@ -209,53 +209,98 @@ describe('@gridatek/nx-supabase', () => {
 
       const projectPath = join(projectDirectory, projectName);
 
-      // Verify .generated directory will be created by start target (depends on build)
-      // Start Supabase in background (use timeout to prevent hanging)
+      // Start Supabase in background (detached process)
       // The start target automatically runs build first
       const startProcess = spawn(
         'npx',
         ['nx', 'run', `${projectName}:start`],
         {
           cwd: projectDirectory,
-          stdio: 'inherit',
+          stdio: 'ignore', // Detach from stdio
           shell: true,
+          detached: true,
           env: process.env,
         }
       );
 
-      // Wait for Supabase to start (give it 60 seconds)
-      const startTimeout = setTimeout(() => {
-        startProcess.kill();
-      }, 60000);
+      // Detach the process so it runs independently
+      startProcess.unref();
 
-      return new Promise<void>((resolve, reject) => {
-        startProcess.on('exit', (code) => {
-          clearTimeout(startTimeout);
+      try {
+        // Wait for Supabase to be ready (poll status)
+        let isReady = false;
+        const maxAttempts = 30; // 30 attempts * 2 seconds = 60 seconds max
 
-          if (code === 0) {
-            // Verify .generated directory was created
-            expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+        for (let i = 0; i < maxAttempts; i++) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
 
-            // Successfully started, now stop it using the convenient shortcut
+          try {
+            // Check if Supabase is running using status command
             execSync(
-              `npx nx run ${projectName}:stop`,
+              `npx nx run ${projectName}:run-command --command="supabase status"`,
               {
                 cwd: projectDirectory,
-                stdio: 'inherit',
+                stdio: 'ignore',
                 env: process.env,
               }
             );
-            resolve();
-          } else {
-            reject(new Error(`Start failed with code ${code}`));
+            isReady = true;
+            break;
+          } catch (error) {
+            // Status check failed, Supabase not ready yet
+            continue;
           }
-        });
+        }
 
-        startProcess.on('error', (error) => {
-          clearTimeout(startTimeout);
-          reject(error);
-        });
-      });
+        if (!isReady) {
+          throw new Error('Supabase failed to start within 60 seconds');
+        }
+
+        // Verify .generated directory was created
+        expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+
+        // Successfully started, now stop it using the convenient shortcut
+        execSync(
+          `npx nx run ${projectName}:stop`,
+          {
+            cwd: projectDirectory,
+            stdio: 'inherit',
+            env: process.env,
+          }
+        );
+
+        // Verify Supabase stopped (status should fail)
+        let hasStopped = false;
+        try {
+          execSync(
+            `npx nx run ${projectName}:run-command --command="supabase status"`,
+            {
+              cwd: projectDirectory,
+              stdio: 'ignore',
+              env: process.env,
+            }
+          );
+        } catch (error) {
+          // Status check failed, meaning Supabase is stopped
+          hasStopped = true;
+        }
+
+        expect(hasStopped).toBe(true);
+      } finally {
+        // Cleanup: ensure Supabase is stopped even if test fails
+        try {
+          execSync(
+            `npx nx run ${projectName}:stop`,
+            {
+              cwd: projectDirectory,
+              stdio: 'ignore',
+              env: process.env,
+            }
+          );
+        } catch (error) {
+          // Ignore errors during cleanup
+        }
+      }
     }, 120000); // 2 minute timeout for this test
   });
 });
