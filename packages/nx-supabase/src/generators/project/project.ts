@@ -5,10 +5,9 @@ import {
   logger,
 } from '@nx/devkit';
 import { execSync } from 'child_process';
-import { existsSync, readFileSync, rmSync } from 'fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { ProjectGeneratorSchema } from './schema';
-import { environmentGenerator } from '../environment/environment';
 
 export async function projectGenerator(
   tree: Tree,
@@ -48,10 +47,10 @@ export async function projectGenerator(
     },
   });
 
-  // Create common directory structure
+  // Create default directory structure
   const directories = [
-    `${projectRoot}/common/migrations`,
-    `${projectRoot}/common/seeds`,
+    `${projectRoot}/default/migrations`,
+    `${projectRoot}/default/seeds`,
     `${projectRoot}/.generated`,
   ];
 
@@ -76,23 +75,29 @@ export async function projectGenerator(
 \`\`\`
 ${projectRoot}/
 ├── project.json           # Nx targets
-├── common/                # Shared across ALL environments
-│   ├── migrations/        # Common migrations
-│   └── seeds/            # Common seeds
-├── <env>/                # Environment-specific (e.g., local, production)
-│   ├── config.toml
-│   ├── migrations/
-│   └── seeds/
-└── .generated/           # AUTO-GENERATED (never edit manually)
-    └── <env>/            # Merged: common + environment
+├── default/               # Default/baseline environment
+│   ├── config.toml        # Main Supabase configuration
+│   ├── migrations/        # Default migrations
+│   └── seeds/             # Default seeds
+├── <env>/                 # Environment overrides (e.g., local, production)
+│   ├── migrations/        # Environment-specific migrations (optional)
+│   └── seeds/             # Environment-specific seeds (optional)
+└── .generated/            # AUTO-GENERATED (never edit manually)
+    └── <env>/             # Merged: default + environment overrides
         ├── config.toml
         ├── migrations/
         └── seeds/
 \`\`\`
 
+## How it Works
+
+- **default/** - Your baseline Supabase configuration (config.toml, migrations, seeds)
+- **<env>/** - Environment-specific overrides (empty by default, only add what's different)
+- **.generated/** - Build output that merges default + environment overrides
+
 ## Usage
 
-Build environment configurations (merges common and environment-specific files):
+Build environment configurations (merges default and environment-specific files):
 \`\`\`bash
 nx run ${options.name}:build
 \`\`\`
@@ -120,15 +125,8 @@ nx run ${options.name}:run-command --command="supabase migration new my_table"
 # Run any Supabase CLI command
 nx run ${options.name}:run-command --env=local --command="supabase db reset"
 \`\`\`
-
-Create additional environments:
-\`\`\`bash
-nx g @gridatek/nx-supabase:environment --project=${options.name} --name=production
-\`\`\`
 `
   );
-
-  await formatFiles(tree);
 
   // Parse environments from comma-separated string
   const envList = (options.environments || 'local')
@@ -136,26 +134,26 @@ nx g @gridatek/nx-supabase:environment --project=${options.name} --name=producti
     .map(env => env.trim())
     .filter(env => env.length > 0);
 
-  // Create each environment using the environment generator
-  const envCallbacks: ((configTemplate?: string) => void)[] = [];
-
+  // Create each environment as empty directories
   for (const envName of envList) {
     logger.info(`Creating ${envName} environment...`);
-    const envCallback = await environmentGenerator(tree, {
-      project: options.name,
-      name: envName,
-    });
+    const envDirectories = [
+      `${projectRoot}/${envName}/migrations`,
+      `${projectRoot}/${envName}/seeds`,
+    ];
 
-    if (envCallback) {
-      envCallbacks.push(envCallback);
+    for (const dir of envDirectories) {
+      tree.write(`${dir}/.gitkeep`, '');
     }
   }
 
+  await formatFiles(tree);
+
   // Return combined callback
   return () => {
-    logger.info('Generating config template from supabase init...');
+    const absoluteProjectRoot = join(tree.root, projectRoot);
 
-    let configTemplate: string | undefined;
+    logger.info('Generating config template from supabase init...');
 
     try {
       // Run supabase init once to get the config template
@@ -167,18 +165,29 @@ nx g @gridatek/nx-supabase:environment --project=${options.name} --name=producti
       const generatedConfigPath = join(tree.root, 'supabase', 'config.toml');
 
       if (existsSync(generatedConfigPath)) {
-        configTemplate = readFileSync(generatedConfigPath, 'utf-8');
+        const configTemplate = readFileSync(generatedConfigPath, 'utf-8');
+
+        // Write config.toml to the default directory
+        const defaultConfigPath = join(absoluteProjectRoot, 'default', 'config.toml');
+        const projectNameWithDefault = `${options.name}-default`;
+        const configContent = configTemplate.replace(
+          /project_id = "[^"]*"/,
+          `project_id = "${projectNameWithDefault}"`
+        );
+
+        writeFileSync(defaultConfigPath, configContent, 'utf-8');
+
+        // Clean up temporary supabase directory
         rmSync(join(tree.root, 'supabase'), { recursive: true, force: true });
+
+        logger.info('✅ Default environment config created successfully!');
       } else {
         logger.warn('Could not find generated config.toml');
+        logger.warn('Please create config.toml manually in the default directory');
       }
-    } catch {
-      logger.warn('Failed to run supabase init, will fallback to individual runs');
-    }
-
-    // Run all environment generator callbacks with the shared config template
-    for (const callback of envCallbacks) {
-      callback(configTemplate);
+    } catch (error) {
+      logger.warn('Failed to run supabase init');
+      logger.warn('Please create config.toml manually in the default directory');
     }
 
     logger.info('');
@@ -188,9 +197,6 @@ nx g @gridatek/nx-supabase:environment --project=${options.name} --name=producti
     logger.info('');
     logger.info('Next steps:');
     logger.info(`  1. Start Supabase: nx run ${options.name}:start`);
-    if (envList.length === 1) {
-      logger.info(`  2. Create another environment: nx g @gridatek/nx-supabase:environment --project=${options.name} --name=production`);
-    }
     logger.info('');
     logger.info('Other commands:');
     logger.info(`  Stop: nx run ${options.name}:stop`);

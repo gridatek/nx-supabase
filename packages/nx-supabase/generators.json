@@ -9,11 +9,6 @@
       "factory": "./dist/generators/project/project",
       "schema": "./dist/generators/project/schema.json",
       "description": "project generator"
-    },
-    "environment": {
-      "factory": "./dist/generators/environment/environment",
-      "schema": "./dist/generators/environment/schema.json",
-      "description": "environment generator"
     }
   }
 }

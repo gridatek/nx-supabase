@@ -1,17 +1,8 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { Tree, readProjectConfiguration } from '@nx/devkit';
-import { vi } from 'vitest';
 
 import { projectGenerator } from './project';
 import { ProjectGeneratorSchema } from './schema';
-import * as environmentModule from '../environment/environment';
-
-// Mock the environment generator
-vi.mock('../environment/environment', () => ({
-  environmentGenerator: vi.fn().mockResolvedValue(() => {
-    // Empty callback function for tests
-  }),
-}));
 
 describe('project generator', () => {
   let tree: Tree;
@@ -19,7 +10,6 @@ describe('project generator', () => {
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
-    vi.clearAllMocks();
   });
 
   it('should create project configuration', async () => {
@@ -30,10 +20,10 @@ describe('project generator', () => {
     expect(config.projectType).toBe('application');
   });
 
-  it('should create common directory structure', async () => {
+  it('should create default directory structure', async () => {
     await projectGenerator(tree, options);
-    expect(tree.exists('test/common/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/common/seeds/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/default/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/default/seeds/.gitkeep')).toBeTruthy();
     expect(tree.exists('test/.generated/.gitkeep')).toBeTruthy();
   });
 
@@ -60,7 +50,7 @@ describe('project generator', () => {
     await projectGenerator(tree, optionsWithDir);
     const config = readProjectConfiguration(tree, 'test');
     expect(config.root).toBe('apps/test');
-    expect(tree.exists('apps/test/common/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('apps/test/default/migrations/.gitkeep')).toBeTruthy();
   });
 
   it('should configure build, start, stop, and run-command targets', async () => {
@@ -89,10 +79,8 @@ describe('project generator', () => {
 
   it('should create default local environment', async () => {
     await projectGenerator(tree, options);
-    expect(environmentModule.environmentGenerator).toHaveBeenCalledWith(tree, {
-      project: 'test',
-      name: 'local',
-    });
+    expect(tree.exists('test/local/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/local/seeds/.gitkeep')).toBeTruthy();
   });
 
   it('should create multiple environments when specified', async () => {
@@ -101,18 +89,17 @@ describe('project generator', () => {
       environments: 'local,staging,production',
     };
     await projectGenerator(tree, optionsWithEnvs);
-    expect(environmentModule.environmentGenerator).toHaveBeenCalledTimes(3);
-    expect(environmentModule.environmentGenerator).toHaveBeenCalledWith(tree, {
-      project: 'test',
-      name: 'local',
-    });
-    expect(environmentModule.environmentGenerator).toHaveBeenCalledWith(tree, {
-      project: 'test',
-      name: 'staging',
-    });
-    expect(environmentModule.environmentGenerator).toHaveBeenCalledWith(tree, {
-      project: 'test',
-      name: 'production',
-    });
+
+    // Check local environment
+    expect(tree.exists('test/local/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/local/seeds/.gitkeep')).toBeTruthy();
+
+    // Check staging environment
+    expect(tree.exists('test/staging/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/staging/seeds/.gitkeep')).toBeTruthy();
+
+    // Check production environment
+    expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/production/seeds/.gitkeep')).toBeTruthy();
   });
 });
