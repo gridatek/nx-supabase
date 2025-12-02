@@ -26,12 +26,12 @@ export async function projectGenerator(
     projectType: 'application',
     sourceRoot: `${projectRoot}`,
     targets: {
-      sync: {
-        executor: '@gridatek/nx-supabase:sync',
+      build: {
+        executor: '@gridatek/nx-supabase:build',
       },
       start: {
         executor: '@gridatek/nx-supabase:start',
-        dependsOn: ['sync'],
+        dependsOn: ['build'],
       },
       stop: {
         executor: '@gridatek/nx-supabase:stop',
@@ -83,9 +83,9 @@ ${projectRoot}/
 
 ## Usage
 
-Sync common and environment files to .generated directories:
+Build environment configurations (merges common and environment-specific files):
 \`\`\`bash
-nx run ${options.name}:sync
+nx run ${options.name}:build
 \`\`\`
 
 Start Supabase for an environment:
@@ -164,13 +164,13 @@ nx g @gridatek/nx-supabase:environment --project=${options.name} --name=producti
     logger.info(`Created with ${envList.length} environment${envList.length > 1 ? 's' : ''}: ${envList.join(', ')}`);
     logger.info('');
     logger.info('Next steps:');
-    logger.info(`  1. Start Supabase: nx run ${options.name}:start --env=${envList[0]} (will auto-sync first)`);
+    logger.info(`  1. Start Supabase: nx run ${options.name}:start --env=${envList[0]} (will auto-build first)`);
     if (envList.length === 1) {
       logger.info(`  2. Create another environment: nx g @gridatek/nx-supabase:environment --project=${options.name} --name=production`);
     }
     logger.info('');
-    logger.info('Note: The start target automatically runs sync before starting Supabase.');
-    logger.info(`      You can also run sync manually: nx run ${options.name}:sync`);
+    logger.info('Note: The start target automatically runs build before starting Supabase.');
+    logger.info(`      You can also run build manually: nx run ${options.name}:build`);
   };
 }
 

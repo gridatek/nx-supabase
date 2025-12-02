@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/schema",
-  "version": 2,
-  "title": "Sync executor",
-  "description": "Syncs common and environment-specific Supabase files to .generated directory for all environments",
-  "type": "object",
-  "properties": {},
-  "required": []
-}

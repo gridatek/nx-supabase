@@ -1,18 +1,18 @@
 import { ExecutorContext } from '@nx/devkit';
 import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { SyncExecutorSchema } from './schema';
-import executor from './sync';
+import { BuildExecutorSchema } from './schema';
+import executor from './build';
 
-const options: SyncExecutorSchema = {};
+const options: BuildExecutorSchema = {};
 
-describe('Sync Executor', () => {
+describe('Build Executor', () => {
   let testRoot: string;
   let context: ExecutorContext;
 
   beforeEach(() => {
     // Create a temporary test directory
-    testRoot = join(process.cwd(), 'tmp', 'sync-executor-test');
+    testRoot = join(process.cwd(), 'tmp', 'build-executor-test');
 
     // Clean up if exists
     if (existsSync(testRoot)) {
@@ -67,7 +67,7 @@ describe('Sync Executor', () => {
     }
   });
 
-  it('should sync all environments successfully', async () => {
+  it('should build all environments successfully', async () => {
     const output = await executor(options, context);
     expect(output.success).toBe(true);
 
@@ -127,7 +127,7 @@ describe('Sync Executor', () => {
     expect(existsSync(join(projectRoot, '.generated', 'local', 'migrations', '.gitkeep'))).toBe(false);
   });
 
-  it('should clean existing .generated directories before syncing', async () => {
+  it('should clean existing .generated directories before building', async () => {
     const projectRoot = join(testRoot, 'test-project');
 
     // Create old file in .generated

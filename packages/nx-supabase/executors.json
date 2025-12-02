@@ -10,10 +10,10 @@
       "schema": "./dist/executors/stop/schema.json",
       "description": "stop executor"
     },
-    "sync": {
-      "implementation": "./dist/executors/sync/sync",
-      "schema": "./dist/executors/sync/schema.json",
-      "description": "sync executor"
+    "build": {
+      "implementation": "./dist/executors/build/build",
+      "schema": "./dist/executors/build/schema.json",
+      "description": "build executor"
     }
   }
 }

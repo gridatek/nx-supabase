@@ -156,9 +156,9 @@ describe('@gridatek/nx-supabase', () => {
     });
   });
 
-  describe('sync executor', () => {
-    it('should sync common and environment-specific files', () => {
-      const projectName = 'sync-test-project';
+  describe('build executor', () => {
+    it('should build common and environment-specific files', () => {
+      const projectName = 'build-test-project';
 
       // Create a project with multiple environments
       execSync(
@@ -172,9 +172,9 @@ describe('@gridatek/nx-supabase', () => {
 
       const projectPath = join(projectDirectory, projectName);
 
-      // Run the sync executor
+      // Run the build executor
       execSync(
-        `npx nx run ${projectName}:sync`,
+        `npx nx run ${projectName}:build`,
         {
           cwd: projectDirectory,
           stdio: 'inherit',
@@ -186,7 +186,7 @@ describe('@gridatek/nx-supabase', () => {
       expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
       expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
 
-      // Verify config.toml files were synced (these are the actual files that get created)
+      // Verify config.toml files were built (these are the actual files that get created)
       expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
       expect(existsSync(join(projectPath, '.generated', 'production', 'config.toml'))).toBe(true);
     });

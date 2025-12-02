@@ -1,10 +1,10 @@
 import { ExecutorContext, logger } from '@nx/devkit';
 import { existsSync, readdirSync, mkdirSync, copyFileSync, rmSync } from 'fs';
 import { join, basename } from 'path';
-import { SyncExecutorSchema } from './schema';
+import { BuildExecutorSchema } from './schema';
 
 const runExecutor = async (
-  options: SyncExecutorSchema,
+  options: BuildExecutorSchema,
   context: ExecutorContext
 ): Promise<{ success: boolean }> => {
   const projectName = context.projectName;
@@ -48,12 +48,12 @@ const runExecutor = async (
 
   logger.info(`Found environments: ${envDirs.join(', ')}`);
 
-  // Sync each environment
+  // Build each environment
   for (const env of envDirs) {
     const envDir = join(projectRoot, env);
     const envGeneratedDir = join(generatedDir, env);
 
-    logger.info(`Syncing ${env} environment...`);
+    logger.info(`Building ${env} environment...`);
 
     // Clean and recreate generated directory for this environment
     if (existsSync(envGeneratedDir)) {
@@ -67,12 +67,12 @@ const runExecutor = async (
     // Copy environment-specific files (overwrites common files if they exist)
     syncDirectory(envDir, envGeneratedDir);
 
-    logger.info(`✓ Synced ${env} to .generated/${env}`);
+    logger.info(`✓ Built ${env} to .generated/${env}`);
   }
 
   logger.info('');
-  logger.info('✅ All environments synced successfully!');
-  logger.info(`   Synced ${envDirs.length} environment${envDirs.length > 1 ? 's' : ''}`);
+  logger.info('✅ All environments built successfully!');
+  logger.info(`   Built ${envDirs.length} environment${envDirs.length > 1 ? 's' : ''}`);
 
   return { success: true };
 };
