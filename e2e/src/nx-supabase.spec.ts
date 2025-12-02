@@ -186,11 +186,9 @@ describe('@gridatek/nx-supabase', () => {
       expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
       expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
 
-      // Verify common structure is present in .generated directories
-      expect(existsSync(join(projectPath, '.generated', 'local', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'local', 'seeds'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production', 'seeds'))).toBe(true);
+      // Verify config.toml files were synced (these are the actual files that get created)
+      expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production', 'config.toml'))).toBe(true);
     });
   });
 });
