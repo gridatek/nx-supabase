@@ -174,7 +174,7 @@ describe('@gridatek/nx-supabase', () => {
 
       // Run the sync executor
       execSync(
-        `npx nx sync ${projectName}`,
+        `npx nx run ${projectName}:sync`,
         {
           cwd: projectDirectory,
           stdio: 'inherit',
