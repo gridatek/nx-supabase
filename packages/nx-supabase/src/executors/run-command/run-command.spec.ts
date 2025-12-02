@@ -1,35 +1,34 @@
 import { ExecutorContext } from '@nx/devkit';
 import { RunCommandExecutorSchema } from './schema';
 import executor from './run-command';
-import { existsSync } from 'fs';
 import { join } from 'path';
-import { vi } from 'vitest';
+import { vi, beforeEach, describe, it, expect } from 'vitest';
+import * as fs from 'fs';
+import * as child_process from 'child_process';
 
 // Mock fs module
-vi.mock('fs', () => ({
-  default: {},
-  existsSync: vi.fn(),
-}));
+vi.mock('fs');
 
 // Mock child_process
-vi.mock('child_process', () => ({
-  default: {},
-  spawn: vi.fn(() => ({
-    on: vi.fn((event, callback) => {
-      if (event === 'exit') {
-        callback(0);
-      }
-    }),
-  })),
-}));
-
-const mockExistsSync = existsSync as ReturnType<typeof vi.fn>;
+vi.mock('child_process');
 
 describe('Supabase Executor', () => {
   let context: ExecutorContext;
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Mock existsSync
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+
+    // Mock spawn
+    vi.mocked(child_process.spawn).mockReturnValue({
+      on: vi.fn((event: string, callback: (code: number) => void) => {
+        if (event === 'exit') {
+          callback(0);
+        }
+      }),
+    } as any);
 
     context = {
       root: '/workspace',
@@ -57,12 +56,10 @@ describe('Supabase Executor', () => {
       command: 'supabase start',
     };
 
-    mockExistsSync.mockReturnValue(true);
-
     const output = await executor(options, context);
 
     // Should check for .generated/local directory (default env)
-    expect(mockExistsSync).toHaveBeenCalledWith(
+    expect(fs.existsSync).toHaveBeenCalledWith(
       join('/workspace', 'apps/test-project', '.generated', 'local')
     );
     expect(output.success).toBe(true);
@@ -74,12 +71,10 @@ describe('Supabase Executor', () => {
       command: 'supabase start',
     };
 
-    mockExistsSync.mockReturnValue(true);
-
     const output = await executor(options, context);
 
     // Should check for .generated/production directory
-    expect(mockExistsSync).toHaveBeenCalledWith(
+    expect(fs.existsSync).toHaveBeenCalledWith(
       join('/workspace', 'apps/test-project', '.generated', 'production')
     );
     expect(output.success).toBe(true);
@@ -90,8 +85,6 @@ describe('Supabase Executor', () => {
       command: ['supabase', 'migration', 'new', 'my_table'],
     };
 
-    mockExistsSync.mockReturnValue(true);
-
     const output = await executor(options, context);
     expect(output.success).toBe(true);
   });
@@ -101,7 +94,7 @@ describe('Supabase Executor', () => {
       command: 'supabase start',
     };
 
-    mockExistsSync.mockReturnValue(false);
+    vi.mocked(fs.existsSync).mockReturnValue(false);
 
     const output = await executor(options, context);
     expect(output.success).toBe(false);
