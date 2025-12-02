@@ -1,14 +1,9 @@
 {
   "executors": {
-    "start": {
-      "implementation": "./dist/executors/start/start",
-      "schema": "./dist/executors/start/schema.json",
-      "description": "start executor"
-    },
-    "stop": {
-      "implementation": "./dist/executors/stop/stop",
-      "schema": "./dist/executors/stop/schema.json",
-      "description": "stop executor"
+    "run-command": {
+      "implementation": "./dist/executors/run-command/run-command",
+      "schema": "./dist/executors/run-command/schema.json",
+      "description": "Runs Supabase CLI commands for a specific environment"
     },
     "build": {
       "implementation": "./dist/executors/build/build",

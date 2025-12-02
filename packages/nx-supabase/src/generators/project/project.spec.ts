@@ -63,13 +63,28 @@ describe('project generator', () => {
     expect(tree.exists('apps/test/common/migrations/.gitkeep')).toBeTruthy();
   });
 
-  it('should configure start and stop targets', async () => {
+  it('should configure build, start, stop, and run-command targets', async () => {
     await projectGenerator(tree, options);
     const config = readProjectConfiguration(tree, 'test');
+
+    // Check build target
+    expect(config.targets?.build).toBeDefined();
+    expect(config.targets?.build?.executor).toBe('@gridatek/nx-supabase:build');
+
+    // Check start target (uses run-command executor with command: 'supabase start')
     expect(config.targets?.start).toBeDefined();
-    expect(config.targets?.start?.executor).toBe('@gridatek/nx-supabase:start');
+    expect(config.targets?.start?.executor).toBe('@gridatek/nx-supabase:run-command');
+    expect(config.targets?.start?.options?.command).toBe('supabase start');
+    expect(config.targets?.start?.dependsOn).toEqual(['build']);
+
+    // Check stop target (uses run-command executor with command: 'supabase stop --no-backup')
     expect(config.targets?.stop).toBeDefined();
-    expect(config.targets?.stop?.executor).toBe('@gridatek/nx-supabase:stop');
+    expect(config.targets?.stop?.executor).toBe('@gridatek/nx-supabase:run-command');
+    expect(config.targets?.stop?.options?.command).toBe('supabase stop --no-backup');
+
+    // Check generic run-command target
+    expect(config.targets?.['run-command']).toBeDefined();
+    expect(config.targets?.['run-command']?.executor).toBe('@gridatek/nx-supabase:run-command');
   });
 
   it('should create default local environment', async () => {

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Run Command executor",
+  "description": "Runs Supabase CLI commands for a specific environment",
+  "type": "object",
+  "properties": {
+    "env": {
+      "type": "string",
+      "default": "local",
+      "description": "Environment to use (e.g., local, staging, production). Defaults to 'local'."
+    },
+    "command": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "Full command to run (e.g., 'supabase start', 'supabase stop', ['supabase', 'migration', 'new', 'my_table'])"
+    }
+  },
+  "required": ["command"]
+}

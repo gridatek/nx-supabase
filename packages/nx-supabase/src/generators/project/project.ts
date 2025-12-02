@@ -30,11 +30,20 @@ export async function projectGenerator(
         executor: '@gridatek/nx-supabase:build',
       },
       start: {
-        executor: '@gridatek/nx-supabase:start',
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase start',
+        },
         dependsOn: ['build'],
       },
       stop: {
-        executor: '@gridatek/nx-supabase:stop',
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase stop --no-backup',
+        },
+      },
+      'run-command': {
+        executor: '@gridatek/nx-supabase:run-command',
       },
     },
   });
@@ -88,14 +97,28 @@ Build environment configurations (merges common and environment-specific files):
 nx run ${options.name}:build
 \`\`\`
 
-Start Supabase for an environment:
+Start/Stop Supabase (convenient shortcuts):
 \`\`\`bash
-nx run ${options.name}:start --env=local
+# Start Supabase (defaults to 'local' environment, runs build first)
+nx run ${options.name}:start
+
+# Start with specific environment
+nx run ${options.name}:start --env=production
+
+# Stop Supabase
+nx run ${options.name}:stop
 \`\`\`
 
-Stop Supabase:
+Run other Supabase commands:
 \`\`\`bash
-nx run ${options.name}:stop
+# Check status
+nx run ${options.name}:run-command --command="supabase status"
+
+# Create migration
+nx run ${options.name}:run-command --command="supabase migration new my_table"
+
+# Run any Supabase CLI command
+nx run ${options.name}:run-command --env=local --command="supabase db reset"
 \`\`\`
 
 Create additional environments:
@@ -164,13 +187,14 @@ nx g @gridatek/nx-supabase:environment --project=${options.name} --name=producti
     logger.info(`Created with ${envList.length} environment${envList.length > 1 ? 's' : ''}: ${envList.join(', ')}`);
     logger.info('');
     logger.info('Next steps:');
-    logger.info(`  1. Start Supabase: nx run ${options.name}:start --env=${envList[0]} (will auto-build first)`);
+    logger.info(`  1. Start Supabase: nx run ${options.name}:start`);
     if (envList.length === 1) {
       logger.info(`  2. Create another environment: nx g @gridatek/nx-supabase:environment --project=${options.name} --name=production`);
     }
     logger.info('');
-    logger.info('Note: The start target automatically runs build before starting Supabase.');
-    logger.info(`      You can also run build manually: nx run ${options.name}:build`);
+    logger.info('Other commands:');
+    logger.info(`  Stop: nx run ${options.name}:stop`);
+    logger.info(`  Status: nx run ${options.name}:run-command --command="supabase status"`);
   };
 }
 
