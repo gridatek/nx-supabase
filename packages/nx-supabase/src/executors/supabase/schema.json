@@ -7,7 +7,8 @@
   "properties": {
     "env": {
       "type": "string",
-      "description": "Environment to use (e.g., local, staging, production). Optional for commands that don't need it."
+      "default": "local",
+      "description": "Environment to use (e.g., local, staging, production). Defaults to 'local'."
     },
     "command": {
       "oneOf": [

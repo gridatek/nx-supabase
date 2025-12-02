@@ -22,6 +22,9 @@ const runExecutor = async (
 
   const projectRoot = join(context.root, projectConfig.root);
 
+  // Apply default env value
+  const env = options.env || 'local';
+
   // Convert command to string if it's an array
   const commandString = Array.isArray(options.command)
     ? options.command.join(' ')
@@ -30,30 +33,26 @@ const runExecutor = async (
   // Split command string into array for spawn
   const commandArgs = commandString.split(' ');
 
-  // Determine working directory based on whether env is specified
+  // Determine working directory based on environment
+  const envGeneratedDir = join(projectRoot, '.generated', env);
   let cwd = projectRoot;
-  if (options.env) {
-    const envGeneratedDir = join(projectRoot, '.generated', options.env);
 
-    // Check if environment exists
-    if (!existsSync(envGeneratedDir)) {
-      logger.error(`Environment '${options.env}' not found at ${envGeneratedDir}`);
-      logger.error(`Make sure you've run: nx run ${projectName}:build`);
-      return { success: false };
-    }
-
-    const configPath = join(envGeneratedDir, 'config.toml');
-    if (!existsSync(configPath)) {
-      logger.error(`Config file not found at ${configPath}`);
-      return { success: false };
-    }
-
-    cwd = envGeneratedDir;
-    logger.info(`Running Supabase command for ${projectName} (${options.env})...`);
-    logger.info(`Using config: ${configPath}`);
-  } else {
-    logger.info(`Running Supabase command for ${projectName}...`);
+  // Check if environment directory exists
+  if (!existsSync(envGeneratedDir)) {
+    logger.error(`Environment '${env}' not found at ${envGeneratedDir}`);
+    logger.error(`Make sure you've run: nx run ${projectName}:build`);
+    return { success: false };
   }
+
+  const configPath = join(envGeneratedDir, 'config.toml');
+  if (!existsSync(configPath)) {
+    logger.error(`Config file not found at ${configPath}`);
+    return { success: false };
+  }
+
+  cwd = envGeneratedDir;
+  logger.info(`Running Supabase command for ${projectName} (${env})...`);
+  logger.info(`Using config: ${configPath}`);
 
   logger.info(`Command: supabase ${commandString}`);
   logger.info('');
