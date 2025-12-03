@@ -59,7 +59,12 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     // Verify project was detected
     expect(results).toHaveLength(1);
     const [, result] = results[0];
+    expect(result.projects).toBeDefined();
     expect(result.projects).toHaveProperty(projectRoot);
+
+    if (!result.projects) {
+      throw new Error('Projects should be defined');
+    }
     const project = result.projects[projectRoot];
 
     // Verify all targets were created
@@ -129,6 +134,11 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     );
 
     const [, result] = results[0];
+    expect(result.projects).toBeDefined();
+
+    if (!result.projects) {
+      throw new Error('Projects should be defined');
+    }
     const project = result.projects[projectRoot];
 
     // Verify custom target names are used
@@ -159,6 +169,11 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     );
 
     const [, result] = results[0];
+    expect(result.projects).toBeDefined();
+
+    if (!result.projects) {
+      throw new Error('Projects should be defined');
+    }
     const project = result.projects[projectRoot];
 
     // Verify all environments are included in inputs
@@ -188,6 +203,11 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     );
 
     const [, result] = results[0];
+    expect(result.projects).toBeDefined();
+
+    if (!result.projects) {
+      throw new Error('Projects should be defined');
+    }
     const project = result.projects[projectRoot];
 
     // Verify only 'local' is included, not .generated or .git
