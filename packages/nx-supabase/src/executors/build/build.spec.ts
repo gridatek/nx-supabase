@@ -21,16 +21,16 @@ describe('Build Executor', () => {
 
     // Create test project structure
     const projectRoot = join(testRoot, 'test-project');
-    mkdirSync(join(projectRoot, 'default', 'migrations'), { recursive: true });
-    mkdirSync(join(projectRoot, 'default', 'seeds'), { recursive: true });
+    mkdirSync(join(projectRoot, 'production', 'migrations'), { recursive: true });
+    mkdirSync(join(projectRoot, 'production', 'seeds'), { recursive: true });
     mkdirSync(join(projectRoot, 'local', 'migrations'), { recursive: true });
     mkdirSync(join(projectRoot, 'local', 'seeds'), { recursive: true });
     mkdirSync(join(projectRoot, 'production', 'migrations'), { recursive: true });
 
     // Create default files
-    writeFileSync(join(projectRoot, 'default', 'config.toml'), 'default config');
-    writeFileSync(join(projectRoot, 'default', 'migrations', '001_init.sql'), 'default migration');
-    writeFileSync(join(projectRoot, 'default', 'seeds', 'data.sql'), 'default seed');
+    writeFileSync(join(projectRoot, 'production', 'config.toml'), 'default config');
+    writeFileSync(join(projectRoot, 'production', 'migrations', '001_init.sql'), 'default migration');
+    writeFileSync(join(projectRoot, 'production', 'seeds', 'data.sql'), 'default seed');
 
     // Create environment-specific files
     writeFileSync(join(projectRoot, 'local', 'config.toml'), 'local config');
@@ -117,7 +117,7 @@ describe('Build Executor', () => {
 
   it('should skip .gitkeep files', async () => {
     const projectRoot = join(testRoot, 'test-project');
-    writeFileSync(join(projectRoot, 'default', 'migrations', '.gitkeep'), '');
+    writeFileSync(join(projectRoot, 'production', 'migrations', '.gitkeep'), '');
     writeFileSync(join(projectRoot, 'local', 'migrations', '.gitkeep'), '');
 
     const output = await executor(options, context);
@@ -146,20 +146,22 @@ describe('Build Executor', () => {
 
   it('should fail if default directory does not exist', async () => {
     const projectRoot = join(testRoot, 'test-project');
-    rmSync(join(projectRoot, 'default'), { recursive: true, force: true });
+    rmSync(join(projectRoot, 'production'), { recursive: true, force: true });
 
     const output = await executor(options, context);
     expect(output.success).toBe(false);
   });
 
-  it('should succeed with warning if no environments exist', async () => {
+  it('should succeed with only production environment', async () => {
     const projectRoot = join(testRoot, 'test-project');
 
-    // Remove all environment directories
+    // Remove all additional environment directories (keep production)
     rmSync(join(projectRoot, 'local'), { recursive: true, force: true });
-    rmSync(join(projectRoot, 'production'), { recursive: true, force: true });
 
     const output = await executor(options, context);
     expect(output.success).toBe(true);
+
+    // Should still build production environment
+    expect(existsSync(join(projectRoot, '.generated', 'production'))).toBe(true);
   });
 });

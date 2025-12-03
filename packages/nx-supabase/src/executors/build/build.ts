@@ -20,22 +20,22 @@ const runExecutor = async (
   }
 
   const projectRoot = join(context.root, projectConfig.root);
-  const defaultDir = join(projectRoot, 'default');
+  const productionDir = join(projectRoot, 'production');
   const generatedDir = join(projectRoot, '.generated');
 
-  // Check if default directory exists
-  if (!existsSync(defaultDir)) {
-    logger.error(`Default directory not found at ${defaultDir}`);
+  // Check if production directory exists
+  if (!existsSync(productionDir)) {
+    logger.error(`Production directory not found at ${productionDir}`);
     return { success: false };
   }
 
-  // Find all environment directories (exclude default and .generated)
+  // Find all environment directories (exclude .generated and hidden dirs)
+  // Production is both the base config AND an environment
   const entries = readdirSync(projectRoot, { withFileTypes: true });
   const envDirs = entries
     .filter(
       (entry) =>
         entry.isDirectory() &&
-        entry.name !== 'default' &&
         entry.name !== '.generated' &&
         !entry.name.startsWith('.')
     )
@@ -61,11 +61,17 @@ const runExecutor = async (
     }
     mkdirSync(envGeneratedDir, { recursive: true });
 
-    // Copy default files first
-    syncDirectory(defaultDir, envGeneratedDir);
+    if (env === 'production') {
+      // For production environment, just copy production files directly
+      syncDirectory(productionDir, envGeneratedDir);
+    } else {
+      // For other environments, merge production (base) + environment-specific files
+      // Copy production files first (base config)
+      syncDirectory(productionDir, envGeneratedDir);
 
-    // Copy environment-specific files (overwrites default files if they exist)
-    syncDirectory(envDir, envGeneratedDir);
+      // Copy environment-specific files (overwrites production files if they exist)
+      syncDirectory(envDir, envGeneratedDir);
+    }
 
     logger.info(`✓ Built ${env} to .generated/${env}`);
   }
