@@ -4,6 +4,8 @@ import {
   Tree,
   logger,
   GeneratorCallback,
+  readNxJson,
+  updateNxJson,
 } from '@nx/devkit';
 import { InitGeneratorSchema } from './schema';
 
@@ -26,6 +28,25 @@ export async function initGenerator(
     );
 
     logger.info('Added Supabase CLI to devDependencies');
+  }
+
+  // Register the inferred tasks plugin in nx.json
+  const nxJson = readNxJson(tree);
+  if (nxJson) {
+    nxJson.plugins = nxJson.plugins || [];
+
+    // Check if plugin is already registered
+    const pluginExists = nxJson.plugins.some(
+      (p) =>
+        p === '@gridatek/nx-supabase' ||
+        (typeof p === 'object' && p.plugin === '@gridatek/nx-supabase')
+    );
+
+    if (!pluginExists) {
+      nxJson.plugins.push('@gridatek/nx-supabase');
+      updateNxJson(tree, nxJson);
+      logger.info('Registered @gridatek/nx-supabase plugin in nx.json');
+    }
   }
 
   await formatFiles(tree);
