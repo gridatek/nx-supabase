@@ -163,65 +163,15 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
 
     // Create a minimal config.toml if supabase init failed
     if (!configCreated) {
-      const minimalConfig = `# Supabase Configuration
-# For full configuration options, see: https://supabase.com/docs/guides/cli/config
+      const templatePath = join(__dirname, 'files', 'config.toml.template');
+      const configTemplate = readFileSync(templatePath, 'utf-8');
+      const projectNameWithProduction = `${options.name}-production`;
+      const configContent = configTemplate.replace(
+        /__PROJECT_ID__/g,
+        projectNameWithProduction
+      );
 
-project_id = "${options.name}-production"
-
-[api]
-enabled = true
-port = 54321
-schemas = ["public", "storage", "graphql_public"]
-extra_search_path = ["public", "extensions"]
-max_rows = 1000
-
-[db]
-port = 54322
-shadow_port = 54320
-major_version = 15
-
-[db.pooler]
-enabled = false
-port = 54329
-pool_mode = "transaction"
-default_pool_size = 20
-max_client_conn = 100
-
-[realtime]
-enabled = true
-ip_version = "ipv4"
-
-[studio]
-enabled = true
-port = 54323
-api_url = "http://127.0.0.1"
-
-[inbucket]
-enabled = true
-port = 54324
-smtp_port = 54325
-pop3_port = 54326
-
-[storage]
-enabled = true
-file_size_limit = "50MiB"
-
-[auth]
-enabled = true
-site_url = "http://127.0.0.1:3000"
-additional_redirect_urls = ["https://127.0.0.1:3000"]
-jwt_expiry = 3600
-enable_refresh_token_rotation = true
-refresh_token_reuse_interval = 10
-enable_signup = true
-
-[auth.email]
-enable_signup = true
-double_confirm_changes = true
-enable_confirmations = false
-`;
-
-      writeFileSync(productionConfigPath, minimalConfig, 'utf-8');
+      writeFileSync(productionConfigPath, configContent, 'utf-8');
       logger.info('✅ Created minimal config.toml (you can update it later)');
     }
 
