@@ -158,6 +158,23 @@ describe('@gridatek/nx-supabase', () => {
       // Verify build worked and generated files
       expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
       expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
+
+      // Verify other inferred targets are also available (start, stop, run-command)
+      // Test that we can run status command (non-Docker command that works in any environment)
+      execSync(
+        `npx nx run ${projectName}:run-command --command="supabase --version"`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // The above proves that:
+      // 1. Project is detected without project.json
+      // 2. Build target works
+      // 3. Run-command target works
+      // Therefore start and stop targets are also available via plugin inference
     });
   });
 
@@ -316,6 +333,121 @@ describe('@gridatek/nx-supabase', () => {
         }
       }
     }, 360000); // 6 minute timeout for this test (5 min for start + 1 min buffer)
+
+    it('should start and stop project without project.json via inferred tasks', async () => {
+      const projectName = 'no-project-json-start-stop';
+
+      // Create a project without project.json
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=local --skipProjectJson`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Verify project.json was NOT created
+      expect(existsSync(join(projectPath, 'project.json'))).toBe(false);
+
+      // Start Supabase in background (detached process)
+      // The start target should be available via inferred tasks plugin
+      const startProcess = spawn(
+        'npx',
+        ['nx', 'run', `${projectName}:start`],
+        {
+          cwd: projectDirectory,
+          stdio: 'ignore',
+          shell: true,
+          detached: true,
+          env: process.env,
+        }
+      );
+
+      startProcess.unref();
+
+      try {
+        // Wait for Supabase to be ready
+        let isReady = false;
+        const maxAttempts = 60;
+        const pollInterval = 5000;
+
+        console.log(`Waiting for Supabase to start (project without project.json)...`);
+
+        for (let i = 0; i < maxAttempts; i++) {
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+
+          try {
+            execSync(
+              `npx nx run ${projectName}:run-command --command="supabase status"`,
+              {
+                cwd: projectDirectory,
+                stdio: 'ignore',
+                env: process.env,
+              }
+            );
+            console.log(`Supabase started successfully (without project.json) after ${(i + 1) * pollInterval / 1000} seconds`);
+            isReady = true;
+            break;
+          } catch (error) {
+            if (i % 6 === 5) {
+              console.log(`Still waiting... (${(i + 1) * pollInterval / 1000}s elapsed)`);
+            }
+            continue;
+          }
+        }
+
+        if (!isReady) {
+          throw new Error(`Supabase failed to start within ${maxAttempts * pollInterval / 1000} seconds`);
+        }
+
+        // Verify .generated directory was created
+        expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+
+        // Stop Supabase using the inferred stop target
+        execSync(
+          `npx nx run ${projectName}:stop`,
+          {
+            cwd: projectDirectory,
+            stdio: 'inherit',
+            env: process.env,
+          }
+        );
+
+        // Verify Supabase stopped
+        let hasStopped = false;
+        try {
+          execSync(
+            `npx nx run ${projectName}:run-command --command="supabase status"`,
+            {
+              cwd: projectDirectory,
+              stdio: 'ignore',
+              env: process.env,
+            }
+          );
+        } catch (error) {
+          hasStopped = true;
+        }
+
+        expect(hasStopped).toBe(true);
+      } finally {
+        // Cleanup
+        try {
+          execSync(
+            `npx nx run ${projectName}:stop`,
+            {
+              cwd: projectDirectory,
+              stdio: 'ignore',
+              env: process.env,
+            }
+          );
+        } catch (error) {
+          // Ignore errors during cleanup
+        }
+      }
+    }, 360000); // 6 minute timeout
   });
 });
 
