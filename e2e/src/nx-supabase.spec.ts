@@ -121,6 +121,44 @@ describe('@gridatek/nx-supabase', () => {
       expect(existsSync(projectPath)).toBe(true);
       expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
     });
+
+    it('should create project without project.json when skipProjectJson is true', () => {
+      const projectName = 'no-project-json';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Verify project structure was created
+      expect(existsSync(projectPath)).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
+
+      // Verify project.json was NOT created
+      expect(existsSync(join(projectPath, 'project.json'))).toBe(false);
+
+      // Verify the project is still detected by running build (via inferred tasks plugin)
+      execSync(
+        `npx nx run ${projectName}:build`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Verify build worked and generated files
+      expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
+    });
   });
 
   describe('build executor', () => {
