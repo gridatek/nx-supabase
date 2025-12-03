@@ -5,7 +5,7 @@ import {
   TargetConfiguration,
 } from '@nx/devkit';
 import { dirname } from 'path';
-import { existsSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 export interface SupabasePluginOptions {
@@ -98,12 +98,31 @@ async function createNodesInternal(
       },
     };
 
+    // Extract project name from config.toml project_id
+    let projectName: string | undefined;
+    try {
+      const configContent = readFileSync(configFullPath, 'utf-8');
+      const projectIdMatch = configContent.match(/project_id\s*=\s*"([^"]+)"/);
+      if (projectIdMatch && projectIdMatch[1]) {
+        projectName = projectIdMatch[1];
+      }
+    } catch {
+      // If we can't read the config, skip this project
+      continue;
+    }
+
+    // If we couldn't extract a project name, skip this project
+    if (!projectName) {
+      continue;
+    }
+
     // Add result for this config file
     results.push([
       configFile,
       {
         projects: {
           [projectRoot]: {
+            name: projectName,
             root: projectRoot,
             targets,
           },
