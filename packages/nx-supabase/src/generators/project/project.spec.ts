@@ -88,4 +88,24 @@ describe('project generator', () => {
     expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
     expect(tree.exists('test/production/seeds/.gitkeep')).toBeTruthy();
   });
+
+  it('should skip project.json when skipProjectJson is true', async () => {
+    const optionsWithSkip: ProjectGeneratorSchema = {
+      name: 'test',
+      skipProjectJson: true,
+    };
+    await projectGenerator(tree, optionsWithSkip);
+
+    // Should not have project.json
+    expect(tree.exists('test/project.json')).toBeFalsy();
+
+    // Should still create directory structure
+    expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/local/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/.gitignore')).toBeTruthy();
+    expect(tree.exists('test/README.md')).toBeTruthy();
+
+    // Should not throw when trying to read config (project doesn't exist in tree)
+    expect(() => readProjectConfiguration(tree, 'test')).toThrow();
+  });
 });

@@ -22,6 +22,11 @@
       "type": "string",
       "description": "Comma-separated list of environments to create (default: local)",
       "default": "local"
+    },
+    "skipProjectJson": {
+      "type": "boolean",
+      "description": "Skip creating project.json and rely on inferred tasks plugin for project detection",
+      "default": false
     }
   },
   "required": ["name"]
