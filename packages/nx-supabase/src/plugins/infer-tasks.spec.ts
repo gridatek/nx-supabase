@@ -32,26 +32,26 @@ describe('Supabase Plugin - Inferred Tasks', () => {
 
   it('should use correct glob pattern for detection', () => {
     const [pattern] = createNodesV2;
-    expect(pattern).toBe('**/default/config.toml');
+    expect(pattern).toBe('**/production/config.toml');
   });
 
   it('should create inferred tasks for Supabase project with config.toml', async () => {
     // Create test Supabase project structure
     const projectRoot = 'my-supabase';
-    const defaultDir = join(tempDir, projectRoot, 'default');
+    const productionDir = join(tempDir, projectRoot, 'production');
     const localDir = join(tempDir, projectRoot, 'local');
 
-    mkdirSync(join(defaultDir, 'migrations'), { recursive: true });
-    mkdirSync(join(defaultDir, 'seeds'), { recursive: true });
+    mkdirSync(join(productionDir, 'migrations'), { recursive: true });
+    mkdirSync(join(productionDir, 'seeds'), { recursive: true });
     mkdirSync(join(localDir, 'migrations'), { recursive: true });
     mkdirSync(join(localDir, 'seeds'), { recursive: true });
 
     // Create the config.toml file (required for detection)
-    writeFileSync(join(defaultDir, 'config.toml'), 'project_id = "test"');
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test"');
 
     const [, handler] = createNodesV2;
     const results = await handler(
-      [join(projectRoot, 'default', 'config.toml')],
+      [join(projectRoot, 'production', 'config.toml')],
       undefined,
       context
     );
@@ -76,7 +76,7 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     // Verify build target configuration
     expect(project.targets?.build?.executor).toBe('@gridatek/nx-supabase:build');
     expect(project.targets?.build?.cache).toBe(true);
-    expect(project.targets?.build?.inputs).toContain('{projectRoot}/default/**/*');
+    expect(project.targets?.build?.inputs).toContain('{projectRoot}/production/**/*');
     expect(project.targets?.build?.inputs).toContain('{projectRoot}/local/**/*');
     expect(project.targets?.build?.outputs).toEqual(['{projectRoot}/.generated']);
 
@@ -96,13 +96,13 @@ describe('Supabase Plugin - Inferred Tasks', () => {
   it('should not create project if config.toml does not exist', async () => {
     // Create project structure without config.toml
     const projectRoot = 'invalid-project';
-    const defaultDir = join(tempDir, projectRoot, 'default');
+    const productionDir = join(tempDir, projectRoot, 'production');
 
-    mkdirSync(join(defaultDir, 'migrations'), { recursive: true });
+    mkdirSync(join(productionDir, 'migrations'), { recursive: true });
 
     const [, handler] = createNodesV2;
     const results = await handler(
-      [join(projectRoot, 'default', 'config.toml')],
+      [join(projectRoot, 'production', 'config.toml')],
       undefined,
       context
     );
@@ -114,10 +114,10 @@ describe('Supabase Plugin - Inferred Tasks', () => {
   it('should support custom target names from options', async () => {
     // Create test project
     const projectRoot = 'custom-targets';
-    const defaultDir = join(tempDir, projectRoot, 'default');
+    const productionDir = join(tempDir, projectRoot, 'production');
 
-    mkdirSync(join(defaultDir, 'migrations'), { recursive: true });
-    writeFileSync(join(defaultDir, 'config.toml'), 'project_id = "test"');
+    mkdirSync(join(productionDir, 'migrations'), { recursive: true });
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test"');
 
     const customOptions = {
       buildTargetName: 'custom-build',
@@ -128,7 +128,7 @@ describe('Supabase Plugin - Inferred Tasks', () => {
 
     const [, handler] = createNodesV2;
     const results = await handler(
-      [join(projectRoot, 'default', 'config.toml')],
+      [join(projectRoot, 'production', 'config.toml')],
       customOptions,
       context
     );
@@ -151,19 +151,18 @@ describe('Supabase Plugin - Inferred Tasks', () => {
   it('should detect multiple environment directories', async () => {
     // Create project with multiple environments
     const projectRoot = 'multi-env';
-    const defaultDir = join(tempDir, projectRoot, 'default');
+    const productionDir = join(tempDir, projectRoot, 'production');
 
-    mkdirSync(join(defaultDir, 'migrations'), { recursive: true });
-    writeFileSync(join(defaultDir, 'config.toml'), 'project_id = "test"');
+    mkdirSync(join(productionDir, 'migrations'), { recursive: true });
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test"');
 
     // Create multiple environment directories
     mkdirSync(join(tempDir, projectRoot, 'local'), { recursive: true });
     mkdirSync(join(tempDir, projectRoot, 'staging'), { recursive: true });
-    mkdirSync(join(tempDir, projectRoot, 'production'), { recursive: true });
 
     const [, handler] = createNodesV2;
     const results = await handler(
-      [join(projectRoot, 'default', 'config.toml')],
+      [join(projectRoot, 'production', 'config.toml')],
       undefined,
       context
     );
@@ -176,19 +175,19 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     }
     const project = result.projects[projectRoot];
 
-    // Verify all environments are included in inputs
+    // Verify all environments are included in inputs (production, local, staging)
+    expect(project.targets?.build?.inputs).toContain('{projectRoot}/production/**/*');
     expect(project.targets?.build?.inputs).toContain('{projectRoot}/local/**/*');
     expect(project.targets?.build?.inputs).toContain('{projectRoot}/staging/**/*');
-    expect(project.targets?.build?.inputs).toContain('{projectRoot}/production/**/*');
   });
 
   it('should ignore .generated and hidden directories', async () => {
     // Create project with directories that should be ignored
     const projectRoot = 'ignore-test';
-    const defaultDir = join(tempDir, projectRoot, 'default');
+    const productionDir = join(tempDir, projectRoot, 'production');
 
-    mkdirSync(join(defaultDir, 'migrations'), { recursive: true });
-    writeFileSync(join(defaultDir, 'config.toml'), 'project_id = "test"');
+    mkdirSync(join(productionDir, 'migrations'), { recursive: true });
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test"');
 
     // Create directories that should be ignored
     mkdirSync(join(tempDir, projectRoot, '.generated'), { recursive: true });
@@ -197,7 +196,7 @@ describe('Supabase Plugin - Inferred Tasks', () => {
 
     const [, handler] = createNodesV2;
     const results = await handler(
-      [join(projectRoot, 'default', 'config.toml')],
+      [join(projectRoot, 'production', 'config.toml')],
       undefined,
       context
     );
@@ -210,7 +209,8 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     }
     const project = result.projects[projectRoot];
 
-    // Verify only 'local' is included, not .generated or .git
+    // Verify production and local are included, but not .generated or .git
+    expect(project.targets?.build?.inputs).toContain('{projectRoot}/production/**/*');
     expect(project.targets?.build?.inputs).toContain('{projectRoot}/local/**/*');
     expect(project.targets?.build?.inputs).not.toContain('{projectRoot}/.generated/**/*');
     expect(project.targets?.build?.inputs).not.toContain('{projectRoot}/.git/**/*');

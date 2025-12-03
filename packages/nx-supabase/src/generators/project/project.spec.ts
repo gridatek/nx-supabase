@@ -22,8 +22,8 @@ describe('project generator', () => {
 
   it('should create default directory structure', async () => {
     await projectGenerator(tree, options);
-    expect(tree.exists('test/default/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/default/seeds/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/production/seeds/.gitkeep')).toBeTruthy();
     expect(tree.exists('test/.generated/.gitkeep')).toBeTruthy();
   });
 
@@ -50,7 +50,7 @@ describe('project generator', () => {
     await projectGenerator(tree, optionsWithDir);
     const config = readProjectConfiguration(tree, 'test');
     expect(config.root).toBe('apps/test');
-    expect(tree.exists('apps/test/default/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('apps/test/production/migrations/.gitkeep')).toBeTruthy();
   });
 
   it('should create project configuration without explicit targets', async () => {

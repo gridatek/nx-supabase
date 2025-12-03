@@ -16,11 +16,11 @@ export interface SupabasePluginOptions {
 }
 
 /**
- * Detect Supabase projects by looking for 'default/config.toml'
+ * Detect Supabase projects by looking for 'production/config.toml'
  * This ensures we only match properly initialized Supabase projects
  */
 export const createNodesV2: CreateNodesV2<SupabasePluginOptions> = [
-  '**/default/config.toml',
+  '**/production/config.toml',
   (configFiles, options, context) =>
     createNodesInternal(configFiles, options, context),
 ];
@@ -39,9 +39,9 @@ async function createNodesInternal(
   const runCommandTargetName = options?.runCommandTargetName ?? 'run-command';
 
   for (const configFile of configFiles) {
-    // configFile is the path to 'default/config.toml'
+    // configFile is the path to 'production/config.toml'
     // We need to go 2 levels up to get the project root
-    // e.g., 'my-supabase/default/config.toml' -> 'my-supabase'
+    // e.g., 'my-supabase/production/config.toml' -> 'my-supabase'
     const projectRoot = dirname(dirname(configFile));
 
     // Verify the config file exists
@@ -50,7 +50,8 @@ async function createNodesInternal(
       continue;
     }
 
-    // Get environment directories (all dirs except 'default', '.generated', and hidden dirs)
+    // Get environment directories (all dirs except '.generated' and hidden dirs)
+    // Note: 'production' is both the base config AND an environment
     const projectFullPath = join(context.workspaceRoot, projectRoot);
     let envDirs: string[] = [];
 
@@ -60,7 +61,6 @@ async function createNodesInternal(
         .filter(
           (entry) =>
             entry.isDirectory() &&
-            entry.name !== 'default' &&
             entry.name !== '.generated' &&
             !entry.name.startsWith('.')
         )
@@ -76,7 +76,6 @@ async function createNodesInternal(
         executor: '@gridatek/nx-supabase:build',
         cache: true,
         inputs: [
-          '{projectRoot}/default/**/*',
           ...envDirs.map((env) => `{projectRoot}/${env}/**/*`),
         ],
         outputs: ['{projectRoot}/.generated'],

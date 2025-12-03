@@ -66,8 +66,8 @@ describe('@gridatek/nx-supabase', () => {
       expect(existsSync(projectPath)).toBe(true);
 
       // Verify default directories exist
-      expect(existsSync(join(projectPath, 'default', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, 'default', 'seeds'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'seeds'))).toBe(true);
 
       // Verify local environment was created
       expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
@@ -119,7 +119,7 @@ describe('@gridatek/nx-supabase', () => {
 
       const projectPath = join(projectDirectory, directory, projectName);
       expect(existsSync(projectPath)).toBe(true);
-      expect(existsSync(join(projectPath, 'default', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
     });
   });
 

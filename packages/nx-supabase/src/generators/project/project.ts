@@ -21,23 +21,15 @@ export async function projectGenerator(
 
   // Add Nx project configuration
   // Note: targets (build, start, stop, run-command) are automatically inferred
-  // by the plugin when it detects default/config.toml
+  // by the plugin when it detects production/config.toml
   addProjectConfiguration(tree, options.name, {
     root: projectRoot,
     projectType: 'application',
     sourceRoot: `${projectRoot}`,
   });
 
-  // Create default directory structure
-  const directories = [
-    `${projectRoot}/default/migrations`,
-    `${projectRoot}/default/seeds`,
-    `${projectRoot}/.generated`,
-  ];
-
-  for (const dir of directories) {
-    tree.write(`${dir}/.gitkeep`, '');
-  }
+  // Create .generated directory
+  tree.write(`${projectRoot}/.generated/.gitkeep`, '');
 
   // Add .gitignore to ignore generated files
   tree.write(
@@ -56,29 +48,27 @@ export async function projectGenerator(
 \`\`\`
 ${projectRoot}/
 ├── project.json           # Nx targets
-├── default/               # Default/baseline environment
+├── production/            # Production environment (base configuration)
 │   ├── config.toml        # Main Supabase configuration
-│   ├── migrations/        # Default migrations
-│   └── seeds/             # Default seeds
-├── <env>/                 # Environment overrides (e.g., local, production)
-│   ├── migrations/        # Environment-specific migrations (optional)
-│   └── seeds/             # Environment-specific seeds (optional)
+│   ├── migrations/        # Production migrations
+│   └── seeds/             # Production seeds
+├── local/                 # Local development overrides
+│   ├── migrations/        # Local-only migrations (optional)
+│   └── seeds/             # Local-only seeds (optional)
 └── .generated/            # AUTO-GENERATED (never edit manually)
-    └── <env>/             # Merged: default + environment overrides
-        ├── config.toml
-        ├── migrations/
-        └── seeds/
+    ├── production/        # Built production config
+    └── local/             # Built local config (production + local overrides)
 \`\`\`
 
 ## How it Works
 
-- **default/** - Your baseline Supabase configuration (config.toml, migrations, seeds)
-- **<env>/** - Environment-specific overrides (empty by default, only add what's different)
-- **.generated/** - Build output that merges default + environment overrides
+- **production/** - Your production Supabase configuration (base config for all environments)
+- **local/** - Local development overrides (empty by default, only add what's different from production)
+- **.generated/** - Build output. For production: copies production/. For other envs: merges production + env overrides
 
 ## Usage
 
-Build environment configurations (merges default and environment-specific files):
+Build environment configurations:
 \`\`\`bash
 nx run ${options.name}:build
 \`\`\`
@@ -88,7 +78,7 @@ Start/Stop Supabase (convenient shortcuts):
 # Start Supabase (defaults to 'local' environment, runs build first)
 nx run ${options.name}:start
 
-# Start with specific environment
+# Start with production environment
 nx run ${options.name}:start --env=production
 
 # Stop Supabase
@@ -110,7 +100,8 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
   );
 
   // Parse environments from comma-separated string
-  const envList = (options.environments || 'local')
+  // Default to both local and production environments
+  const envList = (options.environments || 'local,production')
     .split(',')
     .map(env => env.trim())
     .filter(env => env.length > 0);
@@ -148,27 +139,27 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
       if (existsSync(generatedConfigPath)) {
         const configTemplate = readFileSync(generatedConfigPath, 'utf-8');
 
-        // Write config.toml to the default directory
-        const defaultConfigPath = join(absoluteProjectRoot, 'default', 'config.toml');
-        const projectNameWithDefault = `${options.name}-default`;
+        // Write config.toml to the production directory
+        const productionConfigPath = join(absoluteProjectRoot, 'production', 'config.toml');
+        const projectNameWithProduction = `${options.name}-production`;
         const configContent = configTemplate.replace(
           /project_id = "[^"]*"/,
-          `project_id = "${projectNameWithDefault}"`
+          `project_id = "${projectNameWithProduction}"`
         );
 
-        writeFileSync(defaultConfigPath, configContent, 'utf-8');
+        writeFileSync(productionConfigPath, configContent, 'utf-8');
 
         // Clean up temporary supabase directory
         rmSync(join(tree.root, 'supabase'), { recursive: true, force: true });
 
-        logger.info('✅ Default environment config created successfully!');
+        logger.info('✅ Production environment config created successfully!');
       } else {
         logger.warn('Could not find generated config.toml');
-        logger.warn('Please create config.toml manually in the default directory');
+        logger.warn('Please create config.toml manually in the production directory');
       }
     } catch {
       logger.warn('Failed to run supabase init');
-      logger.warn('Please create config.toml manually in the default directory');
+      logger.warn('Please create config.toml manually in the production directory');
     }
 
     logger.info('');
