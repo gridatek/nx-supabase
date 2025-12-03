@@ -99,14 +99,19 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
 `
   );
 
+  // Always create production directory (base configuration)
+  logger.info('Creating production environment (base configuration)...');
+  tree.write(`${projectRoot}/production/migrations/.gitkeep`, '');
+  tree.write(`${projectRoot}/production/seeds/.gitkeep`, '');
+
   // Parse environments from comma-separated string
-  // Default to both local and production environments
-  const envList = (options.environments || 'local,production')
+  // Default to local environment
+  const envList = (options.environments || 'local')
     .split(',')
     .map(env => env.trim())
-    .filter(env => env.length > 0);
+    .filter(env => env.length > 0 && env !== 'production'); // Exclude production since it's always created
 
-  // Create each environment as empty directories
+  // Create each additional environment as empty directories
   for (const envName of envList) {
     logger.info(`Creating ${envName} environment...`);
     const envDirectories = [
@@ -118,6 +123,9 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
       tree.write(`${dir}/.gitkeep`, '');
     }
   }
+
+  // Add production back to envList for logging purposes
+  const allEnvs = ['production', ...envList];
 
   await formatFiles(tree);
 
@@ -186,7 +194,7 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
     logger.info('');
     logger.info('✅ Supabase project created successfully!');
     logger.info('');
-    logger.info(`Created with ${envList.length} environment${envList.length > 1 ? 's' : ''}: ${envList.join(', ')}`);
+    logger.info(`Created with ${allEnvs.length} environment${allEnvs.length > 1 ? 's' : ''}: ${allEnvs.join(', ')}`);
     logger.info('');
     logger.info('Next steps:');
     logger.info(`  1. Start Supabase: nx run ${options.name}:start`);
