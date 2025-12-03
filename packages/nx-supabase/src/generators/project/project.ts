@@ -5,7 +5,7 @@ import {
   logger,
 } from '@nx/devkit';
 import { execSync } from 'child_process';
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { ProjectGeneratorSchema } from './schema';
 
@@ -149,6 +149,10 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
           `project_id = "${projectNameWithProduction}"`
         );
 
+        // Ensure the production directory exists before writing
+        const productionDir = join(absoluteProjectRoot, 'production');
+        mkdirSync(productionDir, { recursive: true });
+
         writeFileSync(productionConfigPath, configContent, 'utf-8');
 
         // Clean up temporary supabase directory
@@ -170,6 +174,10 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
         /__PROJECT_ID__/g,
         projectNameWithProduction
       );
+
+      // Ensure the production directory exists before writing
+      const productionDir = join(absoluteProjectRoot, 'production');
+      mkdirSync(productionDir, { recursive: true });
 
       writeFileSync(productionConfigPath, configContent, 'utf-8');
       logger.info('✅ Created minimal config.toml (you can update it later)');
