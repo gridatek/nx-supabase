@@ -17,5 +17,5 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: 'test-output/jest/coverage',
-  testTimeout: 120000, // 2 minutes for npm install and tests
+  testTimeout: 300000, // 5 minutes for npm install, workspace creation, and tests
 };
