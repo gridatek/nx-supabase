@@ -39,8 +39,8 @@ jobs:
 
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
       # - run: npx nx-cloud record -- echo Hello World
-      # Exclude e2e project from regular test runs - it has its own target
-      - run: npx nx run-many -t lint test build typecheck --exclude='e2e'
+      # Exclude e2e and npm-e2e projects from regular test runs - they have their own workflows
+      - run: npx nx run-many -t lint test build typecheck --exclude='e2e,npm-e2e'
 
       # Run e2e tests separately with proper setup (local registry)
       - run: npx nx e2e e2e
