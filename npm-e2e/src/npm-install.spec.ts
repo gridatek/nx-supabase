@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import { join, dirname } from 'path';
-import { mkdirSync, rmSync, existsSync } from 'fs';
+import { mkdirSync, rmSync, existsSync, readFileSync } from 'fs';
 
 describe('@gridatek/nx-supabase npm installation', () => {
   let projectDirectory: string;
@@ -81,6 +81,15 @@ describe('@gridatek/nx-supabase npm installation', () => {
 
       // Verify .generated directory exists
       expect(existsSync(join(projectPath, '.generated'))).toBe(true);
+
+      // Verify project.json was created with proper targets
+      expect(existsSync(join(projectPath, 'project.json'))).toBe(true);
+      const projectJson = require(join(projectPath, 'project.json'));
+      expect(projectJson.targets).toBeDefined();
+      expect(projectJson.targets.build).toBeDefined();
+      expect(projectJson.targets.start).toBeDefined();
+      expect(projectJson.targets.stop).toBeDefined();
+      expect(projectJson.targets['run-command']).toBeDefined();
     });
 
     it('should create a project with additional environments', () => {
@@ -104,6 +113,85 @@ describe('@gridatek/nx-supabase npm installation', () => {
       // Verify additional environments were created
       expect(existsSync(join(projectPath, 'staging', 'migrations'))).toBe(true);
       expect(existsSync(join(projectPath, 'development', 'migrations'))).toBe(true);
+    });
+
+    it('should create project in custom directory', () => {
+      const projectName = 'custom-dir-project';
+      const directory = 'apps/backend/custom-dir-project';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --directory=${directory}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, directory);
+      expect(existsSync(projectPath)).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'project.json'))).toBe(true);
+    });
+
+    it('should create project without project.json when skipProjectJson is true', () => {
+      const projectName = 'no-project-json-npm';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Verify project structure was created
+      expect(existsSync(projectPath)).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
+
+      // Verify project.json was NOT created
+      expect(existsSync(join(projectPath, 'project.json'))).toBe(false);
+    });
+
+    it('should create multiple projects in the same workspace', () => {
+      const projectName1 = 'database-api';
+      const projectName2 = 'database-web';
+
+      // Create first project
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName1}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Create second project
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName2}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Verify both projects exist
+      const projectPath1 = join(projectDirectory, projectName1);
+      const projectPath2 = join(projectDirectory, projectName2);
+
+      expect(existsSync(projectPath1)).toBe(true);
+      expect(existsSync(projectPath2)).toBe(true);
+
+      // Verify both have their own config
+      expect(existsSync(join(projectPath1, 'production', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath2, 'production', 'config.toml'))).toBe(true);
     });
   });
 
@@ -141,6 +229,219 @@ describe('@gridatek/nx-supabase npm installation', () => {
       // Verify config.toml files exist
       expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
       expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
+    });
+
+    it('should build project with inferred tasks (without project.json)', () => {
+      const projectName = 'inferred-build-test';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Run the build executor (should work via inferred tasks plugin)
+      execSync(
+        `npx nx run ${projectName}:build`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Verify build worked and generated files
+      expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
+    });
+  });
+
+  describe('run-command executor', () => {
+    it('should execute supabase commands', () => {
+      const projectName = 'run-command-test';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Run supabase --version command
+      const output = execSync(
+        `npx nx run ${projectName}:run-command --command="supabase --version"`,
+        {
+          cwd: projectDirectory,
+          encoding: 'utf-8',
+          env: process.env,
+        }
+      );
+
+      // Verify command executed and returned version
+      expect(output).toContain('supabase');
+    });
+
+    it('should work with inferred tasks', () => {
+      const projectName = 'run-command-inferred';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Run supabase --version command via inferred task
+      const output = execSync(
+        `npx nx run ${projectName}:run-command --command="supabase --version"`,
+        {
+          cwd: projectDirectory,
+          encoding: 'utf-8',
+          env: process.env,
+        }
+      );
+
+      expect(output).toContain('supabase');
+    });
+  });
+
+  describe('Nx integration', () => {
+    it('should be detectable by nx show project command', () => {
+      const projectName = 'nx-show-test';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Run nx show project command
+      const output = execSync(
+        `npx nx show project ${projectName} --json`,
+        {
+          cwd: projectDirectory,
+          encoding: 'utf-8',
+          env: process.env,
+        }
+      );
+
+      const projectInfo = JSON.parse(output);
+      expect(projectInfo.name).toBe(projectName);
+      expect(projectInfo.targets).toBeDefined();
+      expect(projectInfo.targets.build).toBeDefined();
+    });
+
+    it('should work with nx run-many', () => {
+      const projectName1 = 'run-many-test-1';
+      const projectName2 = 'run-many-test-2';
+
+      // Create two projects
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName1}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName2}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Run build on both projects
+      execSync(
+        `npx nx run-many -t build --projects=${projectName1},${projectName2}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Verify both were built
+      const projectPath1 = join(projectDirectory, projectName1);
+      const projectPath2 = join(projectDirectory, projectName2);
+
+      expect(existsSync(join(projectPath1, '.generated', 'local', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath2, '.generated', 'local', 'config.toml'))).toBe(true);
+    });
+  });
+
+  describe('generated files validation', () => {
+    it('should generate valid config.toml files', () => {
+      const projectName = 'config-validation';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Run build
+      execSync(
+        `npx nx run ${projectName}:build`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Verify config.toml contains expected sections
+      const localConfig = readFileSync(
+        join(projectPath, '.generated', 'local', 'config.toml'),
+        'utf-8'
+      );
+
+      expect(localConfig).toContain('[api]');
+      expect(localConfig).toContain('[db]');
+      expect(localConfig).toContain('[studio]');
+    });
+
+    it('should generate proper .gitignore content', () => {
+      const projectName = 'gitignore-test';
+
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+      const gitignore = readFileSync(
+        join(projectPath, '.gitignore'),
+        'utf-8'
+      );
+
+      // Verify .generated is ignored
+      expect(gitignore).toContain('.generated');
     });
   });
 });
