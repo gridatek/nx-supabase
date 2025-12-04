@@ -119,6 +119,10 @@ npx nx g @gridatek/nx-supabase:project my-supabase
 npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/backend/supabase
 # Creates at: apps/backend/supabase/
 
+# You can also include the project name in the path
+npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/my-api/my-supabase
+# Creates at: apps/my-api/my-supabase/
+
 # With additional environments
 npx nx g @gridatek/nx-supabase:project my-supabase \
   --directory=apps/backend/supabase \
