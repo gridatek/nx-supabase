@@ -285,6 +285,16 @@ describe('@gridatek/nx-supabase npm installation', () => {
         }
       );
 
+      // Build the project first to generate config files
+      execSync(
+        `npx nx run ${projectName}:build`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
       // Run supabase --version command
       const output = execSync(
         `npx nx run ${projectName}:run-command --command="supabase --version"`,
@@ -304,6 +314,16 @@ describe('@gridatek/nx-supabase npm installation', () => {
 
       execSync(
         `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      // Build the project first to generate config files
+      execSync(
+        `npx nx run ${projectName}:build`,
         {
           cwd: projectDirectory,
           stdio: 'inherit',
