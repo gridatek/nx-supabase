@@ -52,11 +52,11 @@ This command will:
 ### Create Your First Supabase Project
 
 ```bash
-# Generate a new Supabase project
+# Generate a new Supabase project at workspace root
 npx nx g @gridatek/nx-supabase:project my-supabase
 
-# Or with a custom directory
-npx nx g @gridatek/nx-supabase:project my-api --directory=apps
+# Or specify a full directory path
+npx nx g @gridatek/nx-supabase:project my-api-supabase --directory=apps/my-api/supabase
 ```
 
 This creates a project with:
@@ -128,14 +128,14 @@ Projects are automatically detected when you have a `production/config.toml` fil
 npx nx g @gridatek/nx-supabase:project <name>
 
 # With options
-npx nx g @gridatek/nx-supabase:project my-api \
-  --directory=apps \
+npx nx g @gridatek/nx-supabase:project my-api-supabase \
+  --directory=apps/my-api/supabase \
   --environments=staging,qa \
   --skipProjectJson
 ```
 
 **Options:**
-- `--directory` - Directory where the project will be created
+- `--directory` - Full path where the project will be created (defaults to project name at workspace root)
 - `--environments` - Comma-separated list of additional environments (beyond production and local)
 - `--skipProjectJson` - Skip creating project.json, rely on inferred tasks plugin
 
