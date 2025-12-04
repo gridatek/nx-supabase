@@ -52,11 +52,18 @@ This command will:
 ### Create Your First Supabase Project
 
 ```bash
-# Generate a new Supabase project
+# Generate a new Supabase project (defaults to project name as directory in the root)
 npx nx g @gridatek/nx-supabase:project my-supabase
+# Creates at: my-supabase/ (in the root)
 
-# Or with a custom directory
-npx nx g @gridatek/nx-supabase:project my-api --directory=apps
+# Custom directory (project name ≠ folder name)
+npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/my-api/supabase
+# Creates at: apps/my-api/supabase/
+# Run with: nx run my-supabase:start
+
+# Or match folder name to project name
+npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/my-api/my-supabase
+# Creates at: apps/my-api/my-supabase/
 ```
 
 This creates a project with:
@@ -128,14 +135,15 @@ Projects are automatically detected when you have a `production/config.toml` fil
 npx nx g @gridatek/nx-supabase:project <name>
 
 # With options
-npx nx g @gridatek/nx-supabase:project my-api \
-  --directory=apps \
+npx nx g @gridatek/nx-supabase:project my-supabase \
+  --directory=apps/my-api/supabase \
   --environments=staging,qa \
   --skipProjectJson
+# Creates at: apps/my-api/supabase/
 ```
 
 **Options:**
-- `--directory` - Directory where the project will be created
+- `--directory` - Directory where the project will be created (defaults to project name)
 - `--environments` - Comma-separated list of additional environments (beyond production and local)
 - `--skipProjectJson` - Skip creating project.json, rely on inferred tasks plugin
 
@@ -199,8 +207,10 @@ npx nx run <project>:run-command --command="supabase gen types typescript --loca
 ### Creating Additional Environments
 
 ```bash
-npx nx g @gridatek/nx-supabase:project my-api \
+npx nx g @gridatek/nx-supabase:project my-supabase \
+  --directory=apps/my-api/supabase \
   --environments=staging,qa,dev
+# Creates at: apps/my-api/supabase/
 ```
 
 This creates:

@@ -79,7 +79,7 @@ npx nx g @gridatek/nx-supabase:project <name> [options]
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `--directory` | `string` | `undefined` | Directory where the project will be created. If not specified, creates in workspace root |
+| `--directory` | `string` | project name | Directory where the project will be created. Defaults to project name if not specified |
 | `--environments` | `string` | `undefined` | Comma-separated list of additional environments to create (beyond production and local) |
 | `--skipProjectJson` | `boolean` | `false` | Skip creating project.json and rely on inferred tasks plugin |
 
@@ -111,19 +111,28 @@ npx nx g @gridatek/nx-supabase:project <name> [options]
 **Examples:**
 
 ```bash
-# Basic project in workspace root
+# Basic project (defaults to project name as directory in the root)
 npx nx g @gridatek/nx-supabase:project my-supabase
+# Creates at: my-supabase/ (in the root)
 
-# Project in apps directory
-npx nx g @gridatek/nx-supabase:project api --directory=apps
+# Custom directory (project name ≠ folder name)
+npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/backend/supabase
+# Creates at: apps/backend/supabase/
+# Run with: nx run my-supabase:start
+
+# Or match folder name to project name
+npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/my-api/my-supabase
+# Creates at: apps/my-api/my-supabase/
 
 # With additional environments
-npx nx g @gridatek/nx-supabase:project backend \
-  --directory=apps \
+npx nx g @gridatek/nx-supabase:project my-supabase \
+  --directory=apps/backend/supabase \
   --environments=staging,qa,dev
+# Creates at: apps/backend/supabase/
 
 # Using inferred tasks (no project.json)
-npx nx g @gridatek/nx-supabase:project my-api --skipProjectJson
+npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/backend/supabase --skipProjectJson
+# Creates at: apps/backend/supabase/
 ```
 
 **Environment Behavior:**

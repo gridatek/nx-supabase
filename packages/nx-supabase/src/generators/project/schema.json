@@ -15,8 +15,8 @@
     },
     "directory": {
       "type": "string",
-      "description": "The directory where the project will be created (optional)",
-      "x-prompt": "Where should the project be created? (leave empty for root)"
+      "description": "Directory where the project will be created",
+      "x-prompt": "Where should the project be created?"
     },
     "environments": {
       "type": "string",
