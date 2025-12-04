@@ -52,9 +52,9 @@ This command will:
 ### Create Your First Supabase Project
 
 ```bash
-# Generate a new Supabase project (defaults to project name as directory)
+# Generate a new Supabase project (defaults to project name as directory in the root)
 npx nx g @gridatek/nx-supabase:project my-supabase
-# Creates at: my-supabase/
+# Creates at: my-supabase/ (in the root)
 
 # Custom directory (project name ≠ folder name)
 npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/my-api/supabase

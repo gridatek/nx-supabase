@@ -111,9 +111,9 @@ npx nx g @gridatek/nx-supabase:project <name> [options]
 **Examples:**
 
 ```bash
-# Basic project (defaults to project name as directory)
+# Basic project (defaults to project name as directory in the root)
 npx nx g @gridatek/nx-supabase:project my-supabase
-# Creates at: my-supabase/
+# Creates at: my-supabase/ (in the root)
 
 # Custom directory (project name ≠ folder name)
 npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/backend/supabase
