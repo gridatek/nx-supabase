@@ -108,15 +108,21 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
   tree.write(`${projectRoot}/production/migrations/.gitkeep`, '');
   tree.write(`${projectRoot}/production/seeds/.gitkeep`, '');
 
-  // Parse environments from comma-separated string
-  // Default to local environment
-  const envList = (options.environments || 'local')
-    .split(',')
-    .map(env => env.trim())
-    .filter(env => env.length > 0 && env !== 'production'); // Exclude production since it's always created
+  // Always create local environment (default dev environment)
+  logger.info('Creating local environment...');
+  tree.write(`${projectRoot}/local/migrations/.gitkeep`, '');
+  tree.write(`${projectRoot}/local/seeds/.gitkeep`, '');
+
+  // Parse additional environments from comma-separated string (beyond production and local)
+  const additionalEnvs = options.environments
+    ? options.environments
+        .split(',')
+        .map(env => env.trim())
+        .filter(env => env.length > 0 && env !== 'production' && env !== 'local') // Exclude production and local since they're always created
+    : [];
 
   // Create each additional environment as empty directories
-  for (const envName of envList) {
+  for (const envName of additionalEnvs) {
     logger.info(`Creating ${envName} environment...`);
     const envDirectories = [
       `${projectRoot}/${envName}/migrations`,
@@ -128,8 +134,8 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
     }
   }
 
-  // Add production back to envList for logging purposes
-  const allEnvs = ['production', ...envList];
+  // Build complete list of all environments for logging purposes
+  const allEnvs = ['production', 'local', ...additionalEnvs];
 
   await formatFiles(tree);
 

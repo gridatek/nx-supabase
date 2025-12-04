@@ -69,24 +69,24 @@ describe('project generator', () => {
     expect(tree.exists('test/local/seeds/.gitkeep')).toBeTruthy();
   });
 
-  it('should create multiple environments when specified', async () => {
+  it('should create additional environments beyond production and local', async () => {
     const optionsWithEnvs: ProjectGeneratorSchema = {
       name: 'test',
-      environments: 'local,staging,production',
+      environments: 'staging,dev',
     };
     await projectGenerator(tree, optionsWithEnvs);
 
-    // Check local environment
+    // Production and local should always be created
+    expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/production/seeds/.gitkeep')).toBeTruthy();
     expect(tree.exists('test/local/migrations/.gitkeep')).toBeTruthy();
     expect(tree.exists('test/local/seeds/.gitkeep')).toBeTruthy();
 
-    // Check staging environment
+    // Additional environments should also be created
     expect(tree.exists('test/staging/migrations/.gitkeep')).toBeTruthy();
     expect(tree.exists('test/staging/seeds/.gitkeep')).toBeTruthy();
-
-    // Check production environment
-    expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/production/seeds/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/dev/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/dev/seeds/.gitkeep')).toBeTruthy();
   });
 
   it('should skip project.json when skipProjectJson is true', async () => {
