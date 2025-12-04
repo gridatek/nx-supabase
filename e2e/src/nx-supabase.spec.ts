@@ -157,7 +157,9 @@ describe('@gridatek/nx-supabase', () => {
 
       // Verify build worked and generated files
       expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
+      // Production should NOT be in .generated - it uses production/ directly
+      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(false);
+      expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
 
       // Verify other inferred targets are also available (start, stop, run-command)
       // Test that we can run status command (non-Docker command that works in any environment)
@@ -204,13 +206,14 @@ describe('@gridatek/nx-supabase', () => {
         }
       );
 
-      // Verify .generated directories were created for each environment
+      // Verify .generated directories were created for non-production environments
       expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
+      // Production should NOT be in .generated - it uses production/ directly
+      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(false);
 
-      // Verify config.toml files were built (these are the actual files that get created)
+      // Verify config.toml files exist
       expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
     });
   });
 

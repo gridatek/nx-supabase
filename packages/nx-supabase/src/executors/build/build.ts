@@ -48,8 +48,15 @@ const runExecutor = async (
 
   logger.info(`Found environments: ${envDirs.join(', ')}`);
 
-  // Build each environment
-  for (const env of envDirs) {
+  // Build each environment (excluding production, which is used directly)
+  const envsToBuild = envDirs.filter(env => env !== 'production');
+
+  if (envsToBuild.length === 0) {
+    logger.info('No environments to build (production is used directly)');
+    return { success: true };
+  }
+
+  for (const env of envsToBuild) {
     const envDir = join(projectRoot, env);
     const envGeneratedDir = join(generatedDir, env);
 
@@ -61,24 +68,20 @@ const runExecutor = async (
     }
     mkdirSync(envGeneratedDir, { recursive: true });
 
-    if (env === 'production') {
-      // For production environment, just copy production files directly
-      syncDirectory(productionDir, envGeneratedDir);
-    } else {
-      // For other environments, merge production (base) + environment-specific files
-      // Copy production files first (base config)
-      syncDirectory(productionDir, envGeneratedDir);
+    // Merge production (base) + environment-specific files
+    // Copy production files first (base config)
+    syncDirectory(productionDir, envGeneratedDir);
 
-      // Copy environment-specific files (overwrites production files if they exist)
-      syncDirectory(envDir, envGeneratedDir);
-    }
+    // Copy environment-specific files (overwrites production files if they exist)
+    syncDirectory(envDir, envGeneratedDir);
 
     logger.info(`✓ Built ${env} to .generated/${env}`);
   }
 
   logger.info('');
   logger.info('✅ All environments built successfully!');
-  logger.info(`   Built ${envDirs.length} environment${envDirs.length > 1 ? 's' : ''}`);
+  logger.info(`   Built ${envsToBuild.length} environment${envsToBuild.length > 1 ? 's' : ''}`);
+  logger.info(`   Production environment uses production/ directly`);
 
   return { success: true };
 };

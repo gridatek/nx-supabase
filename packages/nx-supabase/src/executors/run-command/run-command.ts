@@ -34,23 +34,32 @@ const runExecutor = async (
   const commandArgs = commandString.split(' ');
 
   // Determine working directory based on environment
-  const envGeneratedDir = join(projectRoot, '.generated', env);
-  let cwd = projectRoot;
+  // Production uses production/ directly, other environments use .generated/<env>
+  let envDir: string;
+
+  if (env === 'production') {
+    // Use production directory directly
+    envDir = join(projectRoot, 'production');
+  } else {
+    // Use generated directory for other environments
+    envDir = join(projectRoot, '.generated', env);
+  }
 
   // Check if environment directory exists
-  if (!existsSync(envGeneratedDir)) {
-    logger.error(`Environment '${env}' not found at ${envGeneratedDir}`);
-    logger.error(`Make sure you've run: nx run ${projectName}:build`);
+  if (!existsSync(envDir)) {
+    logger.error(`Environment '${env}' not found at ${envDir}`);
+    if (env !== 'production') {
+      logger.error(`Make sure you've run: nx run ${projectName}:build`);
+    }
     return { success: false };
   }
 
-  const configPath = join(envGeneratedDir, 'config.toml');
+  const configPath = join(envDir, 'config.toml');
   if (!existsSync(configPath)) {
     logger.error(`Config file not found at ${configPath}`);
     return { success: false };
   }
 
-  cwd = envGeneratedDir;
   logger.info(`Running command for ${projectName} (${env})...`);
   logger.info(`Using config: ${configPath}`);
 
@@ -59,7 +68,7 @@ const runExecutor = async (
 
   return new Promise((resolve) => {
     const supabase = spawn('npx', commandArgs, {
-      cwd,
+      cwd: envDir,
       stdio: 'inherit',
       shell: true,
     });
