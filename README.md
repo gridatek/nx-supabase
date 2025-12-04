@@ -1,90 +1,422 @@
-# NxSupabase
+# @gridatek/nx-supabase
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="100" alt="Nx Logo" />
+  <span style="font-size: 2em; margin: 0 20px;">+</span>
+  <img src="https://supabase.com/docs/img/supabase-logo-wordmark--light.svg" width="200" alt="Supabase Logo" />
+</p>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+<p align="center">
+  <strong>Nx plugin for Supabase integration</strong>
+</p>
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+<p align="center">
+  Manage multiple Supabase projects and environments in your Nx monorepo with ease
+</p>
 
-## Finish your CI setup
+<p align="center">
+  <a href="https://github.com/gridatek/nx-supabase/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+  <a href="https://www.npmjs.com/package/@gridatek/nx-supabase"><img src="https://img.shields.io/npm/v/@gridatek/nx-supabase.svg" alt="npm version"></a>
+</p>
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/BIr4JzVaB5)
+---
 
+## Features
 
-## Generate a library
+✨ **Multi-Environment Support** - Manage production, local, staging, and custom environments
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+🔧 **Convention Over Configuration** - Automatic project detection via inferred tasks plugin
+
+🚀 **Simple Workflows** - Easy-to-use generators and executors for common Supabase operations
+
+📦 **Monorepo Ready** - Built specifically for Nx workspaces
+
+🔄 **Environment Merging** - Base configuration with environment-specific overrides
+
+⚡ **Fast Builds** - Intelligent caching and optimized build process
+
+## Quick Start
+
+### Installation
+
+```bash
+# Add the plugin to your Nx workspace
+npx nx add @gridatek/nx-supabase
 ```
 
-## Run tasks
+This command will:
+- Install the `@gridatek/nx-supabase` package
+- Add Supabase CLI to your devDependencies
+- Register the plugin in your `nx.json`
 
-To build the library use:
+### Create Your First Supabase Project
 
-```sh
-npx nx build pkg1
+```bash
+# Generate a new Supabase project
+npx nx g @gridatek/nx-supabase:project my-supabase
+
+# Or with a custom directory
+npx nx g @gridatek/nx-supabase:project my-api --directory=apps
 ```
 
-To run any task with Nx use:
+This creates a project with:
+- **production/** - Your production configuration (base for all environments)
+- **local/** - Local development overrides
+- **.generated/** - Auto-generated build outputs
+- **project.json** - Nx project configuration (optional with `--skipProjectJson`)
 
-```sh
-npx nx <target> <project-name>
+### Start Using Supabase
+
+```bash
+# Build environment configurations
+npx nx run my-supabase:build
+
+# Start Supabase locally (defaults to 'local' environment)
+npx nx run my-supabase:start
+
+# Check status
+npx nx run my-supabase:run-command --command="supabase status"
+
+# Stop Supabase
+npx nx run my-supabase:stop
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
+## Project Structure
 
 ```
-npx nx release
+my-supabase/
+├── production/              # Production environment (base configuration)
+│   ├── config.toml          # Main Supabase configuration
+│   ├── migrations/          # Production migrations
+│   │   └── 001_init.sql
+│   └── seeds/               # Production seed data
+│       └── data.sql
+├── local/                   # Local development overrides
+│   ├── migrations/          # Local-only migrations (optional)
+│   └── seeds/               # Local-only seed data (optional)
+├── .generated/              # AUTO-GENERATED (do not edit)
+│   └── local/               # Built local config (production + local overrides)
+├── .gitignore               # Ignores .generated/
+├── README.md                # Project documentation
+└── project.json             # Nx targets (optional with inferred tasks)
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+## How It Works
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Environment Architecture
 
-## Keep TypeScript project references up to date
+1. **Production Directory**: Serves as both the base configuration AND the production environment. Used directly without copying.
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+2. **Additional Environments**: Each environment (local, staging, etc.) starts with the production config and merges in environment-specific overrides.
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
+3. **Build Process**:
+   - Production: Used directly from `production/` folder
+   - Other environments: Built to `.generated/<env>` by merging production + environment-specific files
 
-```sh
-npx nx sync
+### Automatic Project Detection
+
+Projects are automatically detected when you have a `production/config.toml` file. The plugin extracts the project name from the `project_id` field in config.toml.
+
+## Available Commands
+
+### Generators
+
+#### `project` - Create a new Supabase project
+
+```bash
+# Basic usage
+npx nx g @gridatek/nx-supabase:project <name>
+
+# With options
+npx nx g @gridatek/nx-supabase:project my-api \
+  --directory=apps \
+  --environments=staging,qa \
+  --skipProjectJson
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+**Options:**
+- `--directory` - Directory where the project will be created
+- `--environments` - Comma-separated list of additional environments (beyond production and local)
+- `--skipProjectJson` - Skip creating project.json, rely on inferred tasks plugin
 
-```sh
-npx nx sync:check
+**Default Environments:**
+Production and local are always created. Use `--environments` to add more like staging, qa, dev, etc.
+
+#### `init` - Initialize the plugin (runs automatically via `nx add`)
+
+```bash
+npx nx g @gridatek/nx-supabase:init
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+### Executors
 
+#### `build` - Build environment configurations
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+npx nx run <project>:build
+```
 
-## Install Nx Console
+Merges production config with environment-specific files and outputs to `.generated/` (except production which is used directly).
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+#### `start` - Start Supabase
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Default environment (local)
+npx nx run <project>:start
 
-## Useful links
+# Specific environment
+npx nx run <project>:start --env=production
+```
 
-Learn more:
+Automatically runs build before starting.
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+#### `stop` - Stop Supabase
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+npx nx run <project>:stop
+```
+
+Stops the running Supabase instance.
+
+#### `run-command` - Run any Supabase CLI command
+
+```bash
+# Check status
+npx nx run <project>:run-command --command="supabase status"
+
+# Create migration
+npx nx run <project>:run-command --command="supabase migration new my_table"
+
+# Reset database
+npx nx run <project>:run-command --env=local --command="supabase db reset"
+
+# Generate types
+npx nx run <project>:run-command --command="supabase gen types typescript --local"
+```
+
+## Multiple Environments
+
+### Creating Additional Environments
+
+```bash
+npx nx g @gridatek/nx-supabase:project my-api \
+  --environments=staging,qa,dev
+```
+
+This creates:
+- `production/` (base config, always created)
+- `local/` (always created)
+- `staging/` (additional)
+- `qa/` (additional)
+- `dev/` (additional)
+
+### Working with Environments
+
+```bash
+# Build all environments
+npx nx run my-api:build
+
+# Start with staging environment
+npx nx run my-api:start --env=staging
+
+# Run command in QA environment
+npx nx run my-api:run-command --env=qa --command="supabase status"
+```
+
+### Environment Override Strategy
+
+1. Start with production config as base
+2. Override with environment-specific files
+3. Files in environment directories take precedence
+
+**Example:**
+- `production/config.toml` - Base config for all environments
+- `staging/config.toml` - Overrides only the settings different in staging
+- Result: `.generated/staging/` contains merged configuration
+
+## Inferred Tasks (Optional)
+
+By default, projects include a `project.json` with explicit targets. You can skip this file and rely entirely on the inferred tasks plugin:
+
+```bash
+npx nx g @gridatek/nx-supabase:project my-api --skipProjectJson
+```
+
+Benefits:
+- Less configuration to maintain
+- Automatic task detection
+- Convention over configuration
+- Projects detected by `production/config.toml` presence
+
+The plugin automatically infers these targets:
+- `build` - Build environment configurations
+- `start` - Start Supabase
+- `stop` - Stop Supabase
+- `run-command` - Run any Supabase command
+
+## Examples
+
+### Common Workflows
+
+#### Setting up a new project
+
+```bash
+# 1. Generate project
+npx nx g @gridatek/nx-supabase:project my-app
+
+# 2. Start locally
+npx nx run my-app:start
+
+# 3. Check it's running
+npx nx run my-app:run-command --command="supabase status"
+
+# 4. Create a migration
+npx nx run my-app:run-command --command="supabase migration new create_users_table"
+
+# 5. Stop when done
+npx nx run my-app:stop
+```
+
+#### Working with multiple projects
+
+```bash
+# Start multiple projects in parallel
+npx nx run-many --target=start --projects=api,admin
+
+# Build all Supabase projects
+npx nx run-many --target=build --all
+
+# Stop all
+npx nx run-many --target=stop --all
+```
+
+#### Environment-specific migrations
+
+```bash
+# Local-only test migration
+# 1. Create in local/migrations/
+# 2. Build to apply
+npx nx run my-app:build
+
+# 3. Start with local environment (default)
+npx nx run my-app:start
+```
+
+## Configuration
+
+### Plugin Options (nx.json)
+
+```json
+{
+  "plugins": [
+    {
+      "plugin": "@gridatek/nx-supabase",
+      "options": {
+        "buildTargetName": "build",
+        "startTargetName": "start",
+        "stopTargetName": "stop",
+        "runCommandTargetName": "run-command"
+      }
+    }
+  ]
+}
+```
+
+### Supabase Configuration
+
+Edit `production/config.toml` for base configuration. See [Supabase CLI documentation](https://supabase.com/docs/guides/cli/config) for available options.
+
+## CI/CD Integration
+
+### GitHub Actions Example
+
+```yaml
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Supabase projects
+        run: npx nx run-many --target=build --all
+
+      - name: Start Supabase
+        run: npx nx run my-app:start
+
+      - name: Run migrations
+        run: npx nx run my-app:run-command --command="supabase db reset"
+
+      - name: Run tests
+        run: npm test
+
+      - name: Stop Supabase
+        run: npx nx run my-app:stop
+```
+
+## Documentation
+
+- 📖 [API Reference](./docs/api-reference.md) - Detailed API documentation
+- 🎯 [Best Practices](./docs/best-practices.md) - Recommended patterns and workflows
+- 🔧 [Advanced Usage](./docs/advanced-usage.md) - Complex scenarios and customization
+- 🚀 [Migration Guide](./docs/migration-guide.md) - Migrating existing Supabase projects
+
+## Requirements
+
+- Node.js 18+
+- Nx 22+
+- Docker (for running Supabase locally)
+
+## Contributing
+
+Contributions are welcome! Please read our [contributing guidelines](./CONTRIBUTING.md) before submitting a PR.
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/gridatek/nx-supabase.git
+cd nx-supabase
+
+# Install dependencies
+npm install
+
+# Run tests
+npx nx test nx-supabase
+
+# Build the plugin
+npx nx build nx-supabase
+
+# Run e2e tests
+npx nx e2e e2e
+```
+
+## License
+
+MIT © [GridaTek](https://github.com/gridatek)
+
+## Support
+
+- 🐛 [Report Issues](https://github.com/gridatek/nx-supabase/issues)
+- 💬 [Discussions](https://github.com/gridatek/nx-supabase/discussions)
+- 📧 [Email Support](mailto:support@gridatek.com)
+
+## Acknowledgments
+
+- Built on top of [Nx](https://nx.dev) and [Supabase](https://supabase.com)
+- Inspired by the Nx community's excellent plugins
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/gridatek">GridaTek</a>
+</p>
