@@ -14,9 +14,8 @@ permissions:
 jobs:
   npm-e2e:
     runs-on: ubuntu-latest
-    # Only run after successful publish or manual trigger on main branch
-    # Skip for PR branches as they won't match the published npm package
-    if: ${{ (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || github.event.workflow_run.conclusion == 'success' }}
+    # Only run after successful publish or manual trigger
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
         with:
