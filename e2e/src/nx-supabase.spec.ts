@@ -82,14 +82,24 @@ describe('@gridatek/nx-supabase', () => {
       // Verify .generated directory exists
       expect(existsSync(join(projectPath, '.generated'))).toBe(true);
 
-      // Verify project.json was created with proper targets
+      // Verify project.json was created (targets are inferred by the plugin at runtime)
       expect(existsSync(join(projectPath, 'project.json'))).toBe(true);
-      const projectJson = require(join(projectPath, 'project.json'));
-      expect(projectJson.targets).toBeDefined();
-      expect(projectJson.targets.build).toBeDefined();
-      expect(projectJson.targets.start).toBeDefined();
-      expect(projectJson.targets.stop).toBeDefined();
-      expect(projectJson.targets['run-command']).toBeDefined();
+
+      // Verify that inferred targets are available using nx show project
+      const showProjectOutput = execSync(
+        `npx nx show project ${projectName} --json`,
+        {
+          cwd: projectDirectory,
+          encoding: 'utf-8',
+          env: process.env,
+        }
+      );
+      const projectConfig = JSON.parse(showProjectOutput);
+      expect(projectConfig.targets).toBeDefined();
+      expect(projectConfig.targets.build).toBeDefined();
+      expect(projectConfig.targets.start).toBeDefined();
+      expect(projectConfig.targets.stop).toBeDefined();
+      expect(projectConfig.targets['run-command']).toBeDefined();
     });
 
     it('should create a project with additional environments', () => {
