@@ -47,7 +47,7 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     mkdirSync(join(localDir, 'seeds'), { recursive: true });
 
     // Create the config.toml file (required for detection)
-    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test"');
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test-project-id"');
 
     const [, handler] = createNodesV2;
     const results = await handler(
@@ -66,6 +66,9 @@ describe('Supabase Plugin - Inferred Tasks', () => {
       throw new Error('Projects should be defined');
     }
     const project = result.projects[projectRoot];
+
+    // Verify project name is extracted from config.toml project_id
+    expect(project.name).toBe('test-project-id');
 
     // Verify all targets were created
     expect(project.targets).toHaveProperty('build');
@@ -117,7 +120,7 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     const productionDir = join(tempDir, projectRoot, 'production');
 
     mkdirSync(join(productionDir, 'migrations'), { recursive: true });
-    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test"');
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "custom-targets-project"');
 
     const customOptions = {
       buildTargetName: 'custom-build',
@@ -154,7 +157,7 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     const productionDir = join(tempDir, projectRoot, 'production');
 
     mkdirSync(join(productionDir, 'migrations'), { recursive: true });
-    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test"');
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "multi-env-project"');
 
     // Create multiple environment directories
     mkdirSync(join(tempDir, projectRoot, 'local'), { recursive: true });
@@ -187,7 +190,7 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     const productionDir = join(tempDir, projectRoot, 'production');
 
     mkdirSync(join(productionDir, 'migrations'), { recursive: true });
-    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "test"');
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "ignore-test-project"');
 
     // Create directories that should be ignored
     mkdirSync(join(tempDir, projectRoot, '.generated'), { recursive: true });
