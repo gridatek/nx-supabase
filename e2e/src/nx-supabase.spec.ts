@@ -83,11 +83,11 @@ describe('@gridatek/nx-supabase', () => {
       expect(existsSync(join(projectPath, '.generated'))).toBe(true);
     });
 
-    it('should create a project with multiple environments', () => {
+    it('should create a project with additional environments', () => {
       const projectName = 'multi-env-project';
 
       execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=local,staging,production`,
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=staging`,
         {
           cwd: projectDirectory,
           stdio: 'inherit',
@@ -97,11 +97,15 @@ describe('@gridatek/nx-supabase', () => {
 
       const projectPath = join(projectDirectory, projectName);
 
-      // Verify all environments were created
-      ['local', 'staging', 'production'].forEach(env => {
-        expect(existsSync(join(projectPath, env, 'migrations'))).toBe(true);
-        expect(existsSync(join(projectPath, env, 'seeds'))).toBe(true);
-      });
+      // Verify production and local are always created
+      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production', 'seeds'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local', 'seeds'))).toBe(true);
+
+      // Verify additional environment (staging) was created
+      expect(existsSync(join(projectPath, 'staging', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'staging', 'seeds'))).toBe(true);
     });
 
     it('should create project in custom directory', () => {
@@ -184,9 +188,9 @@ describe('@gridatek/nx-supabase', () => {
     it('should build default and environment-specific files', () => {
       const projectName = 'build-test-project';
 
-      // Create a project with multiple environments
+      // Create a project (production and local are created by default)
       execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=local,production`,
+        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
         {
           cwd: projectDirectory,
           stdio: 'inherit',
@@ -222,9 +226,9 @@ describe('@gridatek/nx-supabase', () => {
     it('should start and stop Supabase using convenient shortcuts', async () => {
       const projectName = 'start-stop-test-project';
 
-      // Create a project with local environment
+      // Create a project (production and local are created by default)
       execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=local`,
+        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
         {
           cwd: projectDirectory,
           stdio: 'inherit',
@@ -340,9 +344,9 @@ describe('@gridatek/nx-supabase', () => {
     it('should start and stop project without project.json via inferred tasks', async () => {
       const projectName = 'no-project-json-start-stop';
 
-      // Create a project without project.json
+      // Create a project without project.json (production and local are created by default)
       execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=local --skipProjectJson`,
+        `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
         {
           cwd: projectDirectory,
           stdio: 'inherit',
