@@ -1,0 +1,28 @@
+{
+  "name": "e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "projectType": "application",
+    "sourceRoot": "e2e/src",
+    "tags": ["type:e2e"],
+    "implicitDependencies": [
+      "@gridatek/nx-supabase"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "e2e/jest.config.cts",
+          "runInBand": true
+        },
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  }
+}
