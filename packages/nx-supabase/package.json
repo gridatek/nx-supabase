@@ -68,6 +68,11 @@
               "input": "./packages/nx-supabase",
               "glob": "executors.json",
               "output": "."
+            },
+            {
+              "input": "./packages/nx-supabase",
+              "glob": "package.json",
+              "output": "."
             }
           ]
         }
