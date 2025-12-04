@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/jest",
+    "module": "commonjs",
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "jest.config.cts",
+    "src/**/*.ts"
+  ]
+}
