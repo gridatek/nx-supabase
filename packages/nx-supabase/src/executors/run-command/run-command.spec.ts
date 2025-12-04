@@ -96,7 +96,8 @@ describe.skip('Supabase Executor', () => {
   it('should use specified environment', async () => {
     // Create test structure
     const projectRoot = join(testRoot, 'apps/test-project');
-    const prodDir = join(projectRoot, '.generated', 'production');
+    // Production uses production/ directly, not .generated/production
+    const prodDir = join(projectRoot, 'production');
     mkdirSync(prodDir, { recursive: true });
     writeFileSync(join(prodDir, 'config.toml'), 'test config');
 
