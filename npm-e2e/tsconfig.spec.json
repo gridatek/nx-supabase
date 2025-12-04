@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/jest",
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "jest.config.cts",
+    "src/**/*.ts"
+  ]
+}

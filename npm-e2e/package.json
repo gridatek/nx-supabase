@@ -1,0 +1,22 @@
+{
+  "name": "npm-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "projectType": "application",
+    "sourceRoot": "npm-e2e/src",
+    "tags": ["type:npm-e2e"],
+    "targets": {
+      "test-npm": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "npm-e2e/jest.config.cts",
+          "runInBand": true
+        }
+      }
+    }
+  }
+}

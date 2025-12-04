@@ -1,0 +1,50 @@
+name: NPM E2E Tests
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Publish to NPM"]
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  npm-e2e:
+    runs-on: ubuntu-latest
+    # Only run after successful publish or manual trigger
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      # If triggered by workflow_run, checkout the latest main branch
+      # to ensure we test against the newly published version
+      - name: Checkout latest main
+        if: github.event_name == 'workflow_run'
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+
+      # Cache node_modules
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Wait a bit after publish to ensure npm registry is updated
+      - name: Wait for NPM registry update
+        if: github.event_name == 'workflow_run'
+        run: sleep 60
+
+      # Run npm-e2e tests with the test-npm target
+      - run: npx nx run npm-e2e:test-npm
+        env:
+          CI: true
