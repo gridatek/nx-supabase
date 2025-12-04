@@ -45,12 +45,12 @@ describe('project generator', () => {
   it('should support custom directory', async () => {
     const optionsWithDir: ProjectGeneratorSchema = {
       name: 'test',
-      directory: 'apps'
+      directory: 'apps/my-api/supabase'
     };
     await projectGenerator(tree, optionsWithDir);
     const config = readProjectConfiguration(tree, 'test');
-    expect(config.root).toBe('apps/test');
-    expect(tree.exists('apps/test/production/migrations/.gitkeep')).toBeTruthy();
+    expect(config.root).toBe('apps/my-api/supabase');
+    expect(tree.exists('apps/my-api/supabase/production/migrations/.gitkeep')).toBeTruthy();
   });
 
   it('should create project configuration without explicit targets', async () => {

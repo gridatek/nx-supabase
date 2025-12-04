@@ -13,9 +13,8 @@ export async function projectGenerator(
   tree: Tree,
   options: ProjectGeneratorSchema
 ) {
-  const projectRoot = options.directory
-    ? `${options.directory}/${options.name}`
-    : options.name;
+  // Use directory as-is if provided, otherwise use name
+  const projectRoot = options.directory || options.name;
 
   logger.info(`Creating Supabase project at ${projectRoot}...`);
 
