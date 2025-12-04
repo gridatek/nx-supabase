@@ -1,3 +1,13 @@
+## 0.2.0 (2025-12-04)
+
+### 🩹 Fixes
+
+- Ensure README and LICENSE are included in npm package ([7406af4](https://github.com/gridatek/nx-supabase/commit/7406af4))
+
+### ❤️ Thank You
+
+- kgridou @kgridou
+
 ## 0.1.0 (2025-12-04)
 
 ### 🚀 Features
