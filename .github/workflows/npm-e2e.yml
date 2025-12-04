@@ -44,6 +44,19 @@ jobs:
         if: github.event_name == 'workflow_run'
         run: sleep 60
 
+      # Check if package is available on npm registry
+      - name: Check package availability
+        run: |
+          echo "Checking if @gridatek/nx-supabase is available on npm..."
+          if npm view @gridatek/nx-supabase version; then
+            echo "Package found on npm registry"
+          else
+            echo "ERROR: Package @gridatek/nx-supabase not found on npm registry"
+            echo "This test suite requires the package to be published to npm first"
+            echo "Please run the 'Publish to NPM' workflow before running these tests"
+            exit 1
+          fi
+
       # Run npm-e2e tests with the test-npm target
       - run: npx nx run npm-e2e:test-npm
         env:
