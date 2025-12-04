@@ -1,0 +1,17 @@
+{
+  "name": "npm-e2e",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "npm-e2e/src",
+  "projectType": "application",
+  "tags": ["type:npm-e2e"],
+  "targets": {
+    "test-npm": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{projectRoot}/test-output/jest/coverage"],
+      "options": {
+        "jestConfig": "npm-e2e/jest.config.cts",
+        "runInBand": true
+      }
+    }
+  }
+}
