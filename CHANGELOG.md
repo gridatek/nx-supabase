@@ -1,3 +1,19 @@
+## 0.6.0 (2025-12-04)
+
+### 🚀 Features
+
+- add npm-e2e tests for validating npm installation ([#24](https://github.com/gridatek/nx-supabase/pull/24))
+
+### 🩹 Fixes
+
+- remove failing nx fix-ci step from CI workflow ([#23](https://github.com/gridatek/nx-supabase/pull/23))
+
+### ❤️ Thank You
+
+- Claude
+- kgridou @kgridou
+- Khalil LAGRIDA @klagrida
+
 ## 0.5.0 (2025-12-04)
 
 ### 🩹 Fixes
