@@ -48,6 +48,11 @@
               "input": "./packages/nx-supabase/src",
               "glob": "**/*.d.ts",
               "output": "."
+            },
+            {
+              "input": ".",
+              "glob": "LICENSE",
+              "output": "."
             }
           ]
         }
@@ -63,7 +68,8 @@
     "dist",
     "!**/*.tsbuildinfo",
     "generators.json",
-    "executors.json"
+    "executors.json",
+    "LICENSE"
   ],
   "executors": "./executors.json"
 }
