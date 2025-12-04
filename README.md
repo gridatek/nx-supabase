@@ -56,11 +56,12 @@ This command will:
 npx nx g @gridatek/nx-supabase:project my-supabase
 # Creates at: my-supabase/
 
-# Or specify a custom directory path
+# Custom directory (project name ≠ folder name)
 npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/my-api/supabase
 # Creates at: apps/my-api/supabase/
+# Run with: nx run my-supabase:start
 
-# You can also include the project name in the path
+# Or match folder name to project name
 npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/my-api/my-supabase
 # Creates at: apps/my-api/my-supabase/
 ```
