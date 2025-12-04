@@ -13,16 +13,16 @@
     "supabase",
     "monorepo"
   ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "@gridatek/source": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
     }
   },
   "nx": {
@@ -58,6 +58,21 @@
               "input": ".",
               "glob": "README.md",
               "output": "."
+            },
+            {
+              "input": "./packages/nx-supabase",
+              "glob": "generators.json",
+              "output": "."
+            },
+            {
+              "input": "./packages/nx-supabase",
+              "glob": "executors.json",
+              "output": "."
+            },
+            {
+              "input": "./packages/nx-supabase",
+              "glob": "package.json",
+              "output": "."
             }
           ]
         }
@@ -70,8 +85,12 @@
   },
   "generators": "./generators.json",
   "files": [
-    "dist",
-    "!**/*.tsbuildinfo",
+    "executors",
+    "generators",
+    "plugins",
+    "index.js",
+    "index.d.ts",
+    "index.d.ts.map",
     "generators.json",
     "executors.json",
     "LICENSE",
