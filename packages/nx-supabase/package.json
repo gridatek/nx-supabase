@@ -53,6 +53,11 @@
               "input": ".",
               "glob": "LICENSE",
               "output": "."
+            },
+            {
+              "input": ".",
+              "glob": "README.md",
+              "output": "."
             }
           ]
         }
@@ -69,7 +74,8 @@
     "!**/*.tsbuildinfo",
     "generators.json",
     "executors.json",
-    "LICENSE"
+    "LICENSE",
+    "README.md"
   ],
   "executors": "./executors.json"
 }
