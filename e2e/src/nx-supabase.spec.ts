@@ -110,7 +110,7 @@ describe('@gridatek/nx-supabase', () => {
 
     it('should create project in custom directory', () => {
       const projectName = 'custom-dir-project';
-      const directory = 'apps';
+      const directory = 'apps/custom-dir-project';
 
       execSync(
         `npx nx g @gridatek/nx-supabase:project ${projectName} --directory=${directory}`,
@@ -121,7 +121,7 @@ describe('@gridatek/nx-supabase', () => {
         }
       );
 
-      const projectPath = join(projectDirectory, directory, projectName);
+      const projectPath = join(projectDirectory, directory);
       expect(existsSync(projectPath)).toBe(true);
       expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
     });
