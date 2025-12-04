@@ -108,4 +108,29 @@ describe('project generator', () => {
     // Should not throw when trying to read config (project doesn't exist in tree)
     expect(() => readProjectConfiguration(tree, 'test')).toThrow();
   });
+
+  it('should throw error when directory already exists', async () => {
+    // Create a directory first
+    tree.write('test/some-file.txt', 'existing content');
+
+    // Try to create project at same location
+    await expect(projectGenerator(tree, options)).rejects.toThrow(
+      'Directory "test" already exists. Please choose a different name or directory, or remove the existing directory first.'
+    );
+  });
+
+  it('should throw error when custom directory already exists', async () => {
+    const optionsWithDir: ProjectGeneratorSchema = {
+      name: 'test',
+      directory: 'apps/my-api/supabase'
+    };
+
+    // Create a directory first
+    tree.write('apps/my-api/supabase/some-file.txt', 'existing content');
+
+    // Try to create project at same location
+    await expect(projectGenerator(tree, optionsWithDir)).rejects.toThrow(
+      'Directory "apps/my-api/supabase" already exists. Please choose a different name or directory, or remove the existing directory first.'
+    );
+  });
 });

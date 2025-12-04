@@ -13,8 +13,16 @@ export async function projectGenerator(
   tree: Tree,
   options: ProjectGeneratorSchema
 ) {
-  // Use directory as-is if provided, otherwise use name
+  // Use directory if provided, otherwise default to project name
   const projectRoot = options.directory || options.name;
+
+  // Check if directory already exists
+  if (tree.exists(projectRoot)) {
+    throw new Error(
+      `Directory "${projectRoot}" already exists. ` +
+      `Please choose a different name or directory, or remove the existing directory first.`
+    );
+  }
 
   logger.info(`Creating Supabase project at ${projectRoot}...`);
 

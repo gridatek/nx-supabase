@@ -52,11 +52,13 @@ This command will:
 ### Create Your First Supabase Project
 
 ```bash
-# Generate a new Supabase project at workspace root
+# Generate a new Supabase project (defaults to project name as directory)
 npx nx g @gridatek/nx-supabase:project my-supabase
+# Creates at: my-supabase/
 
-# Or specify a full directory path
-npx nx g @gridatek/nx-supabase:project my-api-supabase --directory=apps/my-api/supabase
+# Or specify a custom directory path
+npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/my-api/supabase
+# Creates at: apps/my-api/supabase/
 ```
 
 This creates a project with:
@@ -128,14 +130,15 @@ Projects are automatically detected when you have a `production/config.toml` fil
 npx nx g @gridatek/nx-supabase:project <name>
 
 # With options
-npx nx g @gridatek/nx-supabase:project my-api-supabase \
+npx nx g @gridatek/nx-supabase:project my-supabase \
   --directory=apps/my-api/supabase \
   --environments=staging,qa \
   --skipProjectJson
+# Creates at: apps/my-api/supabase/
 ```
 
 **Options:**
-- `--directory` - Full path where the project will be created (defaults to project name at workspace root)
+- `--directory` - Directory where the project will be created (defaults to project name)
 - `--environments` - Comma-separated list of additional environments (beyond production and local)
 - `--skipProjectJson` - Skip creating project.json, rely on inferred tasks plugin
 
@@ -199,8 +202,10 @@ npx nx run <project>:run-command --command="supabase gen types typescript --loca
 ### Creating Additional Environments
 
 ```bash
-npx nx g @gridatek/nx-supabase:project my-api \
+npx nx g @gridatek/nx-supabase:project my-supabase \
+  --directory=apps/my-api/supabase \
   --environments=staging,qa,dev
+# Creates at: apps/my-api/supabase/
 ```
 
 This creates:
