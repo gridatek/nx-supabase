@@ -58,6 +58,16 @@
               "input": ".",
               "glob": "README.md",
               "output": "."
+            },
+            {
+              "input": "./packages/nx-supabase",
+              "glob": "generators.json",
+              "output": "."
+            },
+            {
+              "input": "./packages/nx-supabase",
+              "glob": "executors.json",
+              "output": "."
             }
           ]
         }
@@ -70,8 +80,12 @@
   },
   "generators": "./generators.json",
   "files": [
-    "dist",
-    "!**/*.tsbuildinfo",
+    "executors",
+    "generators",
+    "plugins",
+    "index.js",
+    "index.d.ts",
+    "index.d.ts.map",
     "generators.json",
     "executors.json",
     "LICENSE",

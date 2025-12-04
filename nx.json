@@ -5,7 +5,7 @@
     "projects": ["packages/*"],
     "version": {
       "generatorOptions": {
-        "packageRoot": "dist/{projectRoot}",
+        "packageRoot": "{projectRoot}/dist",
         "currentVersionResolver": "git-tag"
       }
     },
