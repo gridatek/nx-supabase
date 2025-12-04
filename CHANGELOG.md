@@ -1,3 +1,14 @@
+## 0.5.0 (2025-12-04)
+
+### 🩹 Fixes
+
+- put LICENSE and README.md in the right folder ([#21](https://github.com/gridatek/nx-supabase/pull/21))
+
+### ❤️ Thank You
+
+- kgridou @kgridou
+- Khalil LAGRIDA @klagrida
+
 ## 0.4.0 (2025-12-04)
 
 This was a version bump only, there were no code changes.
