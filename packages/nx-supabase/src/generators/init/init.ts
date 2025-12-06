@@ -23,7 +23,7 @@ export async function initGenerator(
       tree,
       {},
       {
-        supabase: '^2.0.0',
+        supabase: '^2.65.6',
       }
     );
 
