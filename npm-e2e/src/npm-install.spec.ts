@@ -44,7 +44,7 @@ describe('@gridatek/nx-supabase npm installation', () => {
 
       const packageJson = require(packageJsonPath);
       expect(packageJson.devDependencies['supabase']).toBeDefined();
-      expect(packageJson.devDependencies['supabase']).toBe('^2.0.0');
+      expect(packageJson.devDependencies['supabase']).toBe('^2.65.6');
     });
   });
 

@@ -16,7 +16,7 @@ describe('init generator', () => {
     await initGenerator(tree, options);
     const packageJson = readJson(tree, 'package.json');
     expect(packageJson.devDependencies['supabase']).toBeDefined();
-    expect(packageJson.devDependencies['supabase']).toBe('^2.0.0');
+    expect(packageJson.devDependencies['supabase']).toBe('^2.65.6');
   });
 
   it('should register the plugin in nx.json', async () => {
