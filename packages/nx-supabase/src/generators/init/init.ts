@@ -8,6 +8,7 @@ import {
   updateNxJson,
 } from '@nx/devkit';
 import { InitGeneratorSchema } from './schema';
+import { SUPABASE_CLI_VERSION } from '../../versions';
 
 export async function initGenerator(
   tree: Tree,
@@ -23,7 +24,7 @@ export async function initGenerator(
       tree,
       {},
       {
-        supabase: '^2.65.6',
+        supabase: SUPABASE_CLI_VERSION,
       }
     );
 

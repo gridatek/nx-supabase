@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import { join, dirname } from 'path';
 import { mkdirSync, rmSync, existsSync, readFileSync } from 'fs';
+import { SUPABASE_CLI_VERSION } from '../../packages/nx-supabase/src/versions';
 
 describe('@gridatek/nx-supabase npm installation', () => {
   let projectDirectory: string;
@@ -44,7 +45,7 @@ describe('@gridatek/nx-supabase npm installation', () => {
 
       const packageJson = require(packageJsonPath);
       expect(packageJson.devDependencies['supabase']).toBeDefined();
-      expect(packageJson.devDependencies['supabase']).toBe('^2.65.6');
+      expect(packageJson.devDependencies['supabase']).toBe(SUPABASE_CLI_VERSION);
     });
   });
 

@@ -9,6 +9,7 @@
     "jest.config.cts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "../packages/nx-supabase/src/versions.ts"
   ]
 }

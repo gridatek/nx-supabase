@@ -6,6 +6,7 @@
   },
   "include": [
     "jest.config.cts",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "../packages/nx-supabase/src/versions.ts"
   ]
 }

@@ -38,7 +38,7 @@ npx nx g @gridatek/nx-supabase:init [options]
 
 **What it does:**
 
-1. Adds `supabase` CLI (^2.65.6) to devDependencies (unless `--skipPackageJson` is true)
+1. Adds `supabase` CLI (^2.67.3) to devDependencies (unless `--skipPackageJson` is true)
 2. Registers `@gridatek/nx-supabase` plugin in `nx.json`
 3. Returns a callback to install dependencies
 

@@ -3,6 +3,7 @@ import { Tree, readJson, readNxJson } from '@nx/devkit';
 
 import { initGenerator } from './init';
 import { InitGeneratorSchema } from './schema';
+import { SUPABASE_CLI_VERSION } from '../../versions';
 
 describe('init generator', () => {
   let tree: Tree;
@@ -16,7 +17,7 @@ describe('init generator', () => {
     await initGenerator(tree, options);
     const packageJson = readJson(tree, 'package.json');
     expect(packageJson.devDependencies['supabase']).toBeDefined();
-    expect(packageJson.devDependencies['supabase']).toBe('^2.65.6');
+    expect(packageJson.devDependencies['supabase']).toBe(SUPABASE_CLI_VERSION);
   });
 
   it('should register the plugin in nx.json', async () => {
