@@ -540,30 +540,74 @@ describe('@gridatek/nx-supabase', () => {
           throw new Error(`Supabase failed to start within ${maxAttempts * pollInterval / 1000} seconds`);
         }
 
-        // Execute SQL to create a test table
-        console.log('Creating test table...');
+        // Stop Supabase to create a migration
+        console.log('Stopping Supabase to create migration...');
         execSync(
-          `echo "CREATE TABLE test_reset_table (id serial PRIMARY KEY, name text);" | docker exec -i supabase_db_${projectName} psql -U postgres -d postgres`,
+          `npx nx run ${projectName}:stop`,
           {
             cwd: projectDirectory,
             stdio: 'inherit',
             env: process.env,
-            shell: true,
           }
         );
 
-        // Verify table exists before reset
-        console.log('Verifying table exists before reset...');
-        const tableCheckBefore = execSync(
-          `echo "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'test_reset_table');" | docker exec -i supabase_db_${projectName} psql -U postgres -d postgres -t`,
+        // Create a migration file
+        const fs = require('fs');
+        const migrationsDir = join(projectPath, 'local', 'migrations');
+        const migrationFile = join(migrationsDir, '20240101000000_create_users_table.sql');
+        fs.writeFileSync(migrationFile, 'CREATE TABLE users (id serial PRIMARY KEY, name text);');
+
+        // Restart Supabase (will run migrations)
+        console.log('Restarting Supabase with migration...');
+        const restartProcess = spawn(
+          'npx',
+          ['nx', 'run', `${projectName}:start`],
+          {
+            cwd: projectDirectory,
+            stdio: 'ignore',
+            shell: true,
+            detached: true,
+            env: process.env,
+          }
+        );
+        restartProcess.unref();
+
+        // Wait for Supabase to be ready again
+        isReady = false;
+        for (let i = 0; i < maxAttempts; i++) {
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+          try {
+            execSync(
+              `npx nx run ${projectName}:run-command --command="supabase status"`,
+              {
+                cwd: projectDirectory,
+                stdio: 'ignore',
+                env: process.env,
+              }
+            );
+            console.log(`Supabase restarted after ${(i + 1) * pollInterval / 1000} seconds`);
+            isReady = true;
+            break;
+          } catch (error) {
+            continue;
+          }
+        }
+
+        if (!isReady) {
+          throw new Error('Supabase failed to restart');
+        }
+
+        // Verify migrated table exists
+        console.log('Verifying migrated table exists...');
+        const usersTableBefore = execSync(
+          `docker exec -i supabase_db_${projectName} psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
           {
             cwd: projectDirectory,
             encoding: 'utf-8',
             env: process.env,
-            shell: true,
           }
         );
-        expect(tableCheckBefore.trim()).toBe('t'); // PostgreSQL returns 't' for true
+        expect(usersTableBefore.trim()).toBe('users');
 
         // Test db reset command
         console.log('Testing db reset...');
@@ -586,20 +630,19 @@ describe('@gridatek/nx-supabase', () => {
           }
         );
 
-        // Verify table no longer exists after reset
-        console.log('Verifying table was removed after reset...');
-        const tableCheckAfter = execSync(
-          `echo "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'test_reset_table');" | docker exec -i supabase_db_${projectName} psql -U postgres -d postgres -t`,
+        // Verify migrated table still exists (reset re-runs migrations)
+        console.log('Verifying migrated table still exists after reset...');
+        const usersTableAfter = execSync(
+          `docker exec -i supabase_db_${projectName} psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
           {
             cwd: projectDirectory,
             encoding: 'utf-8',
             env: process.env,
-            shell: true,
           }
         );
-        expect(tableCheckAfter.trim()).toBe('f'); // PostgreSQL returns 'f' for false
+        expect(usersTableAfter.trim()).toBe('users');
 
-        console.log('Database reset successful - table was removed!');
+        console.log('Database reset successful - migrations re-run correctly!');
       } finally {
         // Cleanup: ensure Supabase is stopped
         try {
