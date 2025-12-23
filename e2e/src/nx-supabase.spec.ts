@@ -180,8 +180,7 @@ describe('@gridatek/nx-supabase', () => {
 
       // Verify build worked and generated files
       expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
-      // Production should NOT be in .generated - it uses production/ directly
-      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(false);
+      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(true);
       expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
 
       // Verify other inferred targets are also available (start, stop, run-command)
