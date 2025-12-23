@@ -34,7 +34,7 @@ const runExecutor = async (
   const commandArgs = commandString.split(' ');
 
   // Determine working directory based on environment
-  // Production uses production/ directly, other environments use .generated/<env>
+  // Production uses production/ directly, other environments use .generated/<env>/supabase
   let envDir: string;
 
   if (env === 'production') {
@@ -42,7 +42,7 @@ const runExecutor = async (
     envDir = join(projectRoot, 'production');
   } else {
     // Use generated directory for other environments
-    envDir = join(projectRoot, '.generated', env);
+    envDir = join(projectRoot, '.generated', env, 'supabase');
   }
 
   // Check if environment directory exists

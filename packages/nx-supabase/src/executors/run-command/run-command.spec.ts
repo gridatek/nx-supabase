@@ -73,7 +73,7 @@ describe.skip('Supabase Executor', () => {
   it('should use local as default environment', async () => {
     // Create test structure
     const projectRoot = join(testRoot, 'apps/test-project');
-    const localDir = join(projectRoot, '.generated', 'local');
+    const localDir = join(projectRoot, '.generated', 'local', 'supabase');
     mkdirSync(localDir, { recursive: true });
     writeFileSync(join(localDir, 'config.toml'), 'test config');
 

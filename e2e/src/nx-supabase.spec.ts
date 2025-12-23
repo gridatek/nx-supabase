@@ -230,12 +230,12 @@ describe('@gridatek/nx-supabase', () => {
       );
 
       // Verify .generated directories were created for non-production environments
-      expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase'))).toBe(true);
       // Production should NOT be in .generated - it uses production/ directly
       expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(false);
 
       // Verify config.toml files exist
-      expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
       expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
     });
   });
@@ -314,7 +314,7 @@ describe('@gridatek/nx-supabase', () => {
         }
 
         // Verify .generated directory was created
-        expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+        expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
 
         // Successfully started, now stop it using the convenient shortcut
         execSync(
@@ -430,7 +430,7 @@ describe('@gridatek/nx-supabase', () => {
         }
 
         // Verify .generated directory was created
-        expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+        expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
 
         // Stop Supabase using the inferred stop target
         execSync(

@@ -90,16 +90,16 @@ describe('Build Executor', () => {
     const projectRoot = join(testRoot, 'test-project');
 
     // Check local environment has both default and local files
-    const localConfig = readFileSync(join(projectRoot, '.generated', 'local', 'config.toml'), 'utf-8');
+    const localConfig = readFileSync(join(projectRoot, '.generated', 'local', 'supabase', 'config.toml'), 'utf-8');
     expect(localConfig).toBe('local config'); // Environment-specific overrides default
 
-    const defaultMigration = readFileSync(join(projectRoot, '.generated', 'local', 'migrations', '001_init.sql'), 'utf-8');
+    const defaultMigration = readFileSync(join(projectRoot, '.generated', 'local', 'supabase', 'migrations', '001_init.sql'), 'utf-8');
     expect(defaultMigration).toBe('default migration');
 
-    const localMigration = readFileSync(join(projectRoot, '.generated', 'local', 'migrations', '002_local.sql'), 'utf-8');
+    const localMigration = readFileSync(join(projectRoot, '.generated', 'local', 'supabase', 'migrations', '002_local.sql'), 'utf-8');
     expect(localMigration).toBe('local migration');
 
-    const defaultSeed = readFileSync(join(projectRoot, '.generated', 'local', 'seeds', 'data.sql'), 'utf-8');
+    const defaultSeed = readFileSync(join(projectRoot, '.generated', 'local', 'supabase', 'seeds', 'data.sql'), 'utf-8');
     expect(defaultSeed).toBe('default seed');
   });
 
@@ -131,7 +131,7 @@ describe('Build Executor', () => {
     expect(output.success).toBe(true);
 
     // .gitkeep files should not be copied
-    expect(existsSync(join(projectRoot, '.generated', 'local', 'migrations', '.gitkeep'))).toBe(false);
+    expect(existsSync(join(projectRoot, '.generated', 'local', 'supabase', 'migrations', '.gitkeep'))).toBe(false);
   });
 
   it('should clean existing .generated directories before building', async () => {
@@ -148,7 +148,7 @@ describe('Build Executor', () => {
     expect(existsSync(join(projectRoot, '.generated', 'local', 'old-file.txt'))).toBe(false);
 
     // New files should exist
-    expect(existsSync(join(projectRoot, '.generated', 'local', 'config.toml'))).toBe(true);
+    expect(existsSync(join(projectRoot, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
   });
 
   it('should fail if default directory does not exist', async () => {

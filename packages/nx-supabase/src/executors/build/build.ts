@@ -59,6 +59,7 @@ const runExecutor = async (
   for (const env of envsToBuild) {
     const envDir = join(projectRoot, env);
     const envGeneratedDir = join(generatedDir, env);
+    const supabaseDir = join(envGeneratedDir, 'supabase');
 
     logger.info(`Building ${env} environment...`);
 
@@ -66,16 +67,16 @@ const runExecutor = async (
     if (existsSync(envGeneratedDir)) {
       rmSync(envGeneratedDir, { recursive: true, force: true });
     }
-    mkdirSync(envGeneratedDir, { recursive: true });
+    mkdirSync(supabaseDir, { recursive: true });
 
     // Merge production (base) + environment-specific files
     // Copy production files first (base config)
-    syncDirectory(productionDir, envGeneratedDir);
+    syncDirectory(productionDir, supabaseDir);
 
     // Copy environment-specific files (overwrites production files if they exist)
-    syncDirectory(envDir, envGeneratedDir);
+    syncDirectory(envDir, supabaseDir);
 
-    logger.info(`✓ Built ${env} to .generated/${env}`);
+    logger.info(`✓ Built ${env} to .generated/${env}/supabase`);
   }
 
   logger.info('');
