@@ -231,14 +231,13 @@ describe('@gridatek/nx-supabase npm installation', () => {
         }
       );
 
-      // Verify .generated directories were created for non-production environments
-      expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
-      // Production should NOT be in .generated - it uses production/ directly
-      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(false);
+      // Verify .generated directories were created for all environments
+      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production', 'supabase'))).toBe(true);
 
       // Verify config.toml files exist
-      expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production', 'supabase', 'config.toml'))).toBe(true);
     });
 
     it('should build project with inferred tasks (without project.json)', () => {
@@ -266,8 +265,8 @@ describe('@gridatek/nx-supabase npm installation', () => {
       );
 
       // Verify build worked and generated files
-      expect(existsSync(join(projectPath, '.generated', 'local'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'local', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
       expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
     });
   });
@@ -443,7 +442,7 @@ describe('@gridatek/nx-supabase npm installation', () => {
 
       // Verify config.toml contains expected sections
       const localConfig = readFileSync(
-        join(projectPath, '.generated', 'local', 'config.toml'),
+        join(projectPath, '.generated', 'local', 'supabase', 'config.toml'),
         'utf-8'
       );
 

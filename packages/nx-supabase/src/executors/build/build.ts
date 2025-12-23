@@ -48,17 +48,11 @@ const runExecutor = async (
 
   logger.info(`Found environments: ${envDirs.join(', ')}`);
 
-  // Build each environment (excluding production, which is used directly)
-  const envsToBuild = envDirs.filter(env => env !== 'production');
-
-  if (envsToBuild.length === 0) {
-    logger.info('No environments to build (production is used directly)');
-    return { success: true };
-  }
-
-  for (const env of envsToBuild) {
+  // Build all environments to .generated/<env>/supabase/
+  for (const env of envDirs) {
     const envDir = join(projectRoot, env);
     const envGeneratedDir = join(generatedDir, env);
+    const supabaseDir = join(envGeneratedDir, 'supabase');
 
     logger.info(`Building ${env} environment...`);
 
@@ -66,22 +60,21 @@ const runExecutor = async (
     if (existsSync(envGeneratedDir)) {
       rmSync(envGeneratedDir, { recursive: true, force: true });
     }
-    mkdirSync(envGeneratedDir, { recursive: true });
+    mkdirSync(supabaseDir, { recursive: true });
 
     // Merge production (base) + environment-specific files
     // Copy production files first (base config)
-    syncDirectory(productionDir, envGeneratedDir);
+    syncDirectory(productionDir, supabaseDir);
 
     // Copy environment-specific files (overwrites production files if they exist)
-    syncDirectory(envDir, envGeneratedDir);
+    syncDirectory(envDir, supabaseDir);
 
-    logger.info(`✓ Built ${env} to .generated/${env}`);
+    logger.info(`✓ Built ${env} to .generated/${env}/supabase`);
   }
 
   logger.info('');
   logger.info('✅ All environments built successfully!');
-  logger.info(`   Built ${envsToBuild.length} environment${envsToBuild.length > 1 ? 's' : ''}`);
-  logger.info(`   Production environment uses production/ directly`);
+  logger.info(`   Built ${envDirs.length} environment${envDirs.length > 1 ? 's' : ''}`);
 
   return { success: true };
 };

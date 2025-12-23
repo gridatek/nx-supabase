@@ -73,9 +73,9 @@ ${projectRoot}/
 
 ## How it Works
 
-- **production/** - Your production Supabase configuration (base config for all environments, used directly without copying)
+- **production/** - Your production Supabase configuration (base config for all environments)
 - **local/** - Local development overrides (empty by default, only add what's different from production)
-- **.generated/** - Build output for non-production environments (merges production + env overrides)
+- **.generated/** - Build output for all environments (merges production + env overrides to .generated/<env>/supabase/)
 
 ## Usage
 

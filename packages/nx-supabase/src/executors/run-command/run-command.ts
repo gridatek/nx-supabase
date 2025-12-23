@@ -34,23 +34,13 @@ const runExecutor = async (
   const commandArgs = commandString.split(' ');
 
   // Determine working directory based on environment
-  // Production uses production/ directly, other environments use .generated/<env>
-  let envDir: string;
-
-  if (env === 'production') {
-    // Use production directory directly
-    envDir = join(projectRoot, 'production');
-  } else {
-    // Use generated directory for other environments
-    envDir = join(projectRoot, '.generated', env);
-  }
+  // All environments use .generated/<env>/supabase
+  const envDir = join(projectRoot, '.generated', env, 'supabase');
 
   // Check if environment directory exists
   if (!existsSync(envDir)) {
     logger.error(`Environment '${env}' not found at ${envDir}`);
-    if (env !== 'production') {
-      logger.error(`Make sure you've run: nx run ${projectName}:build`);
-    }
+    logger.error(`Make sure you've run: nx run ${projectName}:build`);
     return { success: false };
   }
 
