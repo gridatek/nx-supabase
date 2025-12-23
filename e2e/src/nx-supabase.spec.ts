@@ -557,6 +557,23 @@ describe('@gridatek/nx-supabase', () => {
 
         // Restart Supabase (will run migrations)
         console.log('Restarting Supabase with migration...');
+
+        // Force a build to ensure migration is copied to .generated
+        execSync(
+          `npx nx run ${projectName}:build`,
+          {
+            cwd: projectDirectory,
+            stdio: 'inherit',
+            env: process.env,
+          }
+        );
+
+        // Verify migration file was copied
+        const generatedMigrationFile = join(projectPath, '.generated', 'local', 'supabase', 'migrations', '20240101000000_create_users_table.sql');
+        if (!require('fs').existsSync(generatedMigrationFile)) {
+          throw new Error(`Migration file not found in generated directory: ${generatedMigrationFile}`);
+        }
+
         const restartProcess = spawn(
           'npx',
           ['nx', 'run', `${projectName}:start`],
