@@ -474,6 +474,110 @@ describe('@gridatek/nx-supabase', () => {
         }
       }
     }, 360000); // 6 minute timeout
+
+    it('should reset database successfully', async () => {
+      const projectName = 'db-reset-test-project';
+
+      // Create a project
+      execSync(
+        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
+        {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        }
+      );
+
+      const projectPath = join(projectDirectory, projectName);
+
+      // Start Supabase in background
+      const startProcess = spawn(
+        'npx',
+        ['nx', 'run', `${projectName}:start`],
+        {
+          cwd: projectDirectory,
+          stdio: 'ignore',
+          shell: true,
+          detached: true,
+          env: process.env,
+        }
+      );
+
+      startProcess.unref();
+
+      try {
+        // Wait for Supabase to be ready
+        let isReady = false;
+        const maxAttempts = 60;
+        const pollInterval = 5000;
+
+        console.log(`Waiting for Supabase to start for db reset test...`);
+
+        for (let i = 0; i < maxAttempts; i++) {
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+
+          try {
+            execSync(
+              `npx nx run ${projectName}:run-command --command="supabase status"`,
+              {
+                cwd: projectDirectory,
+                stdio: 'ignore',
+                env: process.env,
+              }
+            );
+            console.log(`Supabase started successfully for db reset test after ${(i + 1) * pollInterval / 1000} seconds`);
+            isReady = true;
+            break;
+          } catch (error) {
+            if ((i + 1) % 6 === 0) {
+              console.log(`Still waiting... (${(i + 1) * pollInterval / 1000}s elapsed)`);
+            }
+            continue;
+          }
+        }
+
+        if (!isReady) {
+          throw new Error(`Supabase failed to start within ${maxAttempts * pollInterval / 1000} seconds`);
+        }
+
+        // Test db reset command
+        console.log('Testing db reset...');
+        execSync(
+          `npx nx run ${projectName}:run-command --command="supabase db reset"`,
+          {
+            cwd: projectDirectory,
+            stdio: 'inherit',
+            env: process.env,
+          }
+        );
+
+        // Verify Supabase is still running after reset
+        execSync(
+          `npx nx run ${projectName}:run-command --command="supabase status"`,
+          {
+            cwd: projectDirectory,
+            stdio: 'inherit',
+            env: process.env,
+          }
+        );
+
+        console.log('Database reset successful!');
+      } finally {
+        // Cleanup: ensure Supabase is stopped
+        try {
+          execSync(
+            `npx nx run ${projectName}:stop`,
+            {
+              cwd: projectDirectory,
+              stdio: 'ignore',
+              env: process.env,
+            }
+          );
+        } catch (error) {
+          // Ignore errors during cleanup
+        }
+      }
+    }, 360000); // 6 minute timeout
   });
 });
 
