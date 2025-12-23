@@ -1,6 +1,6 @@
 {
   "name": "@gridatek/nx-supabase",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "Nx plugin for Supabase integration",
   "license": "MIT",
   "repository": {
