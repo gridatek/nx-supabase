@@ -540,6 +540,31 @@ describe('@gridatek/nx-supabase', () => {
           throw new Error(`Supabase failed to start within ${maxAttempts * pollInterval / 1000} seconds`);
         }
 
+        // Execute SQL to create a test table
+        console.log('Creating test table...');
+        execSync(
+          `echo "CREATE TABLE test_reset_table (id serial PRIMARY KEY, name text);" | docker exec -i supabase_db_${projectName} psql -U postgres -d postgres`,
+          {
+            cwd: projectDirectory,
+            stdio: 'inherit',
+            env: process.env,
+            shell: true,
+          }
+        );
+
+        // Verify table exists before reset
+        console.log('Verifying table exists before reset...');
+        const tableCheckBefore = execSync(
+          `echo "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'test_reset_table');" | docker exec -i supabase_db_${projectName} psql -U postgres -d postgres -t`,
+          {
+            cwd: projectDirectory,
+            encoding: 'utf-8',
+            env: process.env,
+            shell: true,
+          }
+        );
+        expect(tableCheckBefore.trim()).toBe('t'); // PostgreSQL returns 't' for true
+
         // Test db reset command
         console.log('Testing db reset...');
         execSync(
@@ -561,7 +586,20 @@ describe('@gridatek/nx-supabase', () => {
           }
         );
 
-        console.log('Database reset successful!');
+        // Verify table no longer exists after reset
+        console.log('Verifying table was removed after reset...');
+        const tableCheckAfter = execSync(
+          `echo "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'test_reset_table');" | docker exec -i supabase_db_${projectName} psql -U postgres -d postgres -t`,
+          {
+            cwd: projectDirectory,
+            encoding: 'utf-8',
+            env: process.env,
+            shell: true,
+          }
+        );
+        expect(tableCheckAfter.trim()).toBe('f'); // PostgreSQL returns 'f' for false
+
+        console.log('Database reset successful - table was removed!');
       } finally {
         // Cleanup: ensure Supabase is stopped
         try {
