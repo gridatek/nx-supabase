@@ -112,13 +112,12 @@ my-supabase/
 
 ### Environment Architecture
 
-1. **Production Directory**: Serves as both the base configuration AND the production environment. Used directly without copying.
+1. **Production Directory**: Serves as the base configuration for all environments.
 
-2. **Additional Environments**: Each environment (local, staging, etc.) starts with the production config and merges in environment-specific overrides.
+2. **Additional Environments**: Each environment (local, staging, production, etc.) starts with the production config and merges in environment-specific overrides.
 
 3. **Build Process**:
-   - Production: Used directly from `production/` folder
-   - Other environments: Built to `.generated/<env>` by merging production + environment-specific files
+   - All environments: Built to `.generated/<env>/supabase` by merging production + environment-specific files
 
 ### Automatic Project Detection
 
@@ -164,7 +163,7 @@ npx nx g @gridatek/nx-supabase:init
 npx nx run <project>:build
 ```
 
-Merges production config with environment-specific files and outputs to `.generated/` (except production which is used directly).
+Merges production config with environment-specific files and outputs to `.generated/<env>/supabase/` for all environments.
 
 #### `start` - Start Supabase
 

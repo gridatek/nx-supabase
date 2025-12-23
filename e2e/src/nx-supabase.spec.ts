@@ -229,14 +229,13 @@ describe('@gridatek/nx-supabase', () => {
         }
       );
 
-      // Verify .generated directories were created for non-production environments
+      // Verify .generated directories were created for all environments
       expect(existsSync(join(projectPath, '.generated', 'local', 'supabase'))).toBe(true);
-      // Production should NOT be in .generated - it uses production/ directly
-      expect(existsSync(join(projectPath, '.generated', 'production'))).toBe(false);
+      expect(existsSync(join(projectPath, '.generated', 'production', 'supabase'))).toBe(true);
 
       // Verify config.toml files exist
       expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath, '.generated', 'production', 'supabase', 'config.toml'))).toBe(true);
     });
   });
 

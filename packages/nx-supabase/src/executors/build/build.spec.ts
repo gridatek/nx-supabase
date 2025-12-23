@@ -73,14 +73,12 @@ describe('Build Executor', () => {
 
     const projectRoot = join(testRoot, 'test-project');
 
-    // Check that .generated directory was created for local
-    expect(existsSync(join(projectRoot, '.generated', 'local'))).toBe(true);
+    // Check that .generated directory was created for all environments
+    expect(existsSync(join(projectRoot, '.generated', 'local', 'supabase'))).toBe(true);
+    expect(existsSync(join(projectRoot, '.generated', 'production', 'supabase'))).toBe(true);
 
-    // Production should NOT be in .generated - it uses production/ directly
-    expect(existsSync(join(projectRoot, '.generated', 'production'))).toBe(false);
-
-    // Production directory should exist and have config
-    expect(existsSync(join(projectRoot, 'production', 'config.toml'))).toBe(true);
+    // Check config files exist
+    expect(existsSync(join(projectRoot, '.generated', 'production', 'supabase', 'config.toml'))).toBe(true);
   });
 
   it('should merge default files with environment files', async () => {
@@ -109,17 +107,17 @@ describe('Build Executor', () => {
 
     const projectRoot = join(testRoot, 'test-project');
 
-    // Production is used directly from production/ directory, not copied to .generated
-    expect(existsSync(join(projectRoot, '.generated', 'production'))).toBe(false);
+    // Production is now also built to .generated
+    expect(existsSync(join(projectRoot, '.generated', 'production', 'supabase'))).toBe(true);
 
-    // Verify production files exist in production/ directory
-    const prodConfig = readFileSync(join(projectRoot, 'production', 'config.toml'), 'utf-8');
+    // Verify production files were built correctly
+    const prodConfig = readFileSync(join(projectRoot, '.generated', 'production', 'supabase', 'config.toml'), 'utf-8');
     expect(prodConfig).toBe('production config');
 
-    const prodMigration = readFileSync(join(projectRoot, 'production', 'migrations', '002_prod.sql'), 'utf-8');
+    const prodMigration = readFileSync(join(projectRoot, '.generated', 'production', 'supabase', 'migrations', '002_prod.sql'), 'utf-8');
     expect(prodMigration).toBe('prod migration');
 
-    expect(existsSync(join(projectRoot, 'production', 'migrations', '001_init.sql'))).toBe(true);
+    expect(existsSync(join(projectRoot, '.generated', 'production', 'supabase', 'migrations', '001_init.sql'))).toBe(true);
   });
 
   it('should skip .gitkeep files', async () => {
@@ -168,10 +166,10 @@ describe('Build Executor', () => {
     const output = await executor(options, context);
     expect(output.success).toBe(true);
 
-    // Production is not built to .generated - it's used directly
-    expect(existsSync(join(projectRoot, '.generated', 'production'))).toBe(false);
+    // Production is now built to .generated
+    expect(existsSync(join(projectRoot, '.generated', 'production', 'supabase'))).toBe(true);
 
-    // Production directory should still exist with config
-    expect(existsSync(join(projectRoot, 'production', 'config.toml'))).toBe(true);
+    // Config should exist in .generated
+    expect(existsSync(join(projectRoot, '.generated', 'production', 'supabase', 'config.toml'))).toBe(true);
   });
 });

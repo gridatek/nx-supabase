@@ -189,11 +189,11 @@ interface BuildExecutorSchema {
    - Copies files from `production/` (base configuration)
    - Overlays files from `<env>/` (environment-specific overrides)
    - Skips `.gitkeep` files
-4. Production environment is used directly from `production/` folder (not copied)
+4. All environments are built to `.generated/<env>/supabase/`
 
 **Output:**
 
-- `.generated/<env>/` for each non-production environment
+- `.generated/<env>/supabase/` for all environments
 - Cached by Nx for faster rebuilds
 
 **Inputs (for caching):**
@@ -253,8 +253,7 @@ interface StartExecutorSchema {
 
 1. Runs `build` target first (via `dependsOn`)
 2. Determines working directory:
-   - Production: Uses `production/` directly
-   - Other environments: Uses `.generated/<env>/`
+   - All environments: Uses `.generated/<env>/supabase/`
 3. Validates that `config.toml` exists
 4. Executes `supabase start` in the appropriate directory
 5. Streams output to console

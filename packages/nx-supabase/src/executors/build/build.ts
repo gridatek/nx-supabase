@@ -48,15 +48,8 @@ const runExecutor = async (
 
   logger.info(`Found environments: ${envDirs.join(', ')}`);
 
-  // Build each environment (excluding production, which is used directly)
-  const envsToBuild = envDirs.filter(env => env !== 'production');
-
-  if (envsToBuild.length === 0) {
-    logger.info('No environments to build (production is used directly)');
-    return { success: true };
-  }
-
-  for (const env of envsToBuild) {
+  // Build all environments to .generated/<env>/supabase/
+  for (const env of envDirs) {
     const envDir = join(projectRoot, env);
     const envGeneratedDir = join(generatedDir, env);
     const supabaseDir = join(envGeneratedDir, 'supabase');
@@ -81,8 +74,7 @@ const runExecutor = async (
 
   logger.info('');
   logger.info('✅ All environments built successfully!');
-  logger.info(`   Built ${envsToBuild.length} environment${envsToBuild.length > 1 ? 's' : ''}`);
-  logger.info(`   Production environment uses production/ directly`);
+  logger.info(`   Built ${envDirs.length} environment${envDirs.length > 1 ? 's' : ''}`);
 
   return { success: true };
 };
