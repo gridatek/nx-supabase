@@ -92,9 +92,11 @@ async function createNodesInternal(
         options: {
           command: 'supabase stop --no-backup',
         },
+        dependsOn: [buildTargetName],
       },
       [runCommandTargetName]: {
         executor: '@gridatek/nx-supabase:run-command',
+        dependsOn: [buildTargetName],
       },
     };
 
