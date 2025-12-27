@@ -82,7 +82,7 @@ npx nx run my-supabase:build
 npx nx run my-supabase:start
 
 # Check status
-npx nx run my-supabase:run-command --command="supabase status"
+npx nx run my-supabase:status
 
 # Stop Supabase
 npx nx run my-supabase:stop
@@ -185,20 +185,48 @@ npx nx run <project>:stop
 
 Stops the running Supabase instance.
 
-#### `run-command` - Run any Supabase CLI command
+#### Common Targets
+
+The plugin provides convenient shortcuts for frequently used Supabase commands:
 
 ```bash
 # Check status
-npx nx run <project>:run-command --command="supabase status"
-
-# Create migration
-npx nx run <project>:run-command --command="supabase migration new my_table"
+npx nx run <project>:status
 
 # Reset database
-npx nx run <project>:run-command --env=local --command="supabase db reset"
+npx nx run <project>:db-reset
 
-# Generate types
-npx nx run <project>:run-command --command="supabase gen types typescript --local"
+# Push migrations to remote
+npx nx run <project>:db-push
+
+# Pull schema from remote
+npx nx run <project>:db-pull
+
+# Generate TypeScript types
+npx nx run <project>:gen-types
+
+# Create a new migration (pass name via command option)
+npx nx run <project>:migration-new --command="supabase migration new my_table"
+
+# Link to remote project
+npx nx run <project>:link
+
+# Show database diff
+npx nx run <project>:db-diff
+```
+
+All targets (except `link`) automatically run `build` first to ensure configurations are up-to-date.
+
+#### `run-command` - Run any Supabase CLI command
+
+For commands not covered by the convenience targets:
+
+```bash
+# Run any Supabase command
+npx nx run <project>:run-command --command="supabase functions new my-function"
+
+# With specific environment
+npx nx run <project>:run-command --env=staging --command="supabase db remote commit"
 ```
 
 ## Multiple Environments
@@ -261,6 +289,14 @@ The plugin automatically infers these targets:
 - `build` - Build environment configurations
 - `start` - Start Supabase
 - `stop` - Stop Supabase
+- `status` - Check Supabase status
+- `db-reset` - Reset the database
+- `db-push` - Push migrations to remote
+- `db-pull` - Pull schema from remote
+- `gen-types` - Generate TypeScript types
+- `migration-new` - Create a new migration
+- `link` - Link to remote project
+- `db-diff` - Show database diff
 - `run-command` - Run any Supabase command
 
 ## Examples
@@ -277,10 +313,10 @@ npx nx g @gridatek/nx-supabase:project my-app
 npx nx run my-app:start
 
 # 3. Check it's running
-npx nx run my-app:run-command --command="supabase status"
+npx nx run my-app:status
 
 # 4. Create a migration
-npx nx run my-app:run-command --command="supabase migration new create_users_table"
+npx nx run my-app:migration-new --command="supabase migration new create_users_table"
 
 # 5. Stop when done
 npx nx run my-app:stop
@@ -315,6 +351,8 @@ npx nx run my-app:start
 
 ### Plugin Options (nx.json)
 
+You can customize target names if needed:
+
 ```json
 {
   "plugins": [
@@ -324,6 +362,14 @@ npx nx run my-app:start
         "buildTargetName": "build",
         "startTargetName": "start",
         "stopTargetName": "stop",
+        "statusTargetName": "status",
+        "dbResetTargetName": "db-reset",
+        "dbPushTargetName": "db-push",
+        "dbPullTargetName": "db-pull",
+        "genTypesTargetName": "gen-types",
+        "migrationNewTargetName": "migration-new",
+        "linkTargetName": "link",
+        "dbDiffTargetName": "db-diff",
         "runCommandTargetName": "run-command"
       }
     }

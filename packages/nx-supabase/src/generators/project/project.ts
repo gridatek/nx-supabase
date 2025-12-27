@@ -84,7 +84,7 @@ Build environment configurations:
 nx run ${options.name}:build
 \`\`\`
 
-Start/Stop Supabase (convenient shortcuts):
+Start/Stop Supabase:
 \`\`\`bash
 # Start Supabase (defaults to 'local' environment, runs build first)
 nx run ${options.name}:start
@@ -96,16 +96,40 @@ nx run ${options.name}:start --env=production
 nx run ${options.name}:stop
 \`\`\`
 
-Run other Supabase commands:
+Common Supabase commands:
 \`\`\`bash
 # Check status
-nx run ${options.name}:run-command --command="supabase status"
+nx run ${options.name}:status
 
-# Create migration
-nx run ${options.name}:run-command --command="supabase migration new my_table"
+# Reset database
+nx run ${options.name}:db-reset
 
-# Run any Supabase CLI command
-nx run ${options.name}:run-command --env=local --command="supabase db reset"
+# Push migrations to remote
+nx run ${options.name}:db-push
+
+# Pull schema from remote
+nx run ${options.name}:db-pull
+
+# Generate TypeScript types
+nx run ${options.name}:gen-types
+
+# Create a new migration
+nx run ${options.name}:migration-new --command="supabase migration new my_table"
+
+# Link to remote project
+nx run ${options.name}:link
+
+# Show database diff
+nx run ${options.name}:db-diff
+\`\`\`
+
+Run any Supabase CLI command:
+\`\`\`bash
+# Run any command not covered above
+nx run ${options.name}:run-command --command="supabase functions new my-function"
+
+# With specific environment
+nx run ${options.name}:run-command --env=local --command="supabase db remote commit"
 \`\`\`
 `
   );
@@ -216,9 +240,11 @@ nx run ${options.name}:run-command --env=local --command="supabase db reset"
     logger.info('Next steps:');
     logger.info(`  1. Start Supabase: nx run ${options.name}:start`);
     logger.info('');
-    logger.info('Other commands:');
+    logger.info('Common commands:');
+    logger.info(`  Status: nx run ${options.name}:status`);
     logger.info(`  Stop: nx run ${options.name}:stop`);
-    logger.info(`  Status: nx run ${options.name}:run-command --command="supabase status"`);
+    logger.info(`  Reset DB: nx run ${options.name}:db-reset`);
+    logger.info(`  Gen Types: nx run ${options.name}:gen-types`);
   };
 }
 

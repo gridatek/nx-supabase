@@ -13,6 +13,14 @@ export interface SupabasePluginOptions {
   startTargetName?: string;
   stopTargetName?: string;
   runCommandTargetName?: string;
+  statusTargetName?: string;
+  dbResetTargetName?: string;
+  dbPushTargetName?: string;
+  dbPullTargetName?: string;
+  genTypesTargetName?: string;
+  migrationNewTargetName?: string;
+  linkTargetName?: string;
+  dbDiffTargetName?: string;
 }
 
 /**
@@ -37,6 +45,14 @@ async function createNodesInternal(
   const startTargetName = options?.startTargetName ?? 'start';
   const stopTargetName = options?.stopTargetName ?? 'stop';
   const runCommandTargetName = options?.runCommandTargetName ?? 'run-command';
+  const statusTargetName = options?.statusTargetName ?? 'status';
+  const dbResetTargetName = options?.dbResetTargetName ?? 'db-reset';
+  const dbPushTargetName = options?.dbPushTargetName ?? 'db-push';
+  const dbPullTargetName = options?.dbPullTargetName ?? 'db-pull';
+  const genTypesTargetName = options?.genTypesTargetName ?? 'gen-types';
+  const migrationNewTargetName = options?.migrationNewTargetName ?? 'migration-new';
+  const linkTargetName = options?.linkTargetName ?? 'link';
+  const dbDiffTargetName = options?.dbDiffTargetName ?? 'db-diff';
 
   for (const configFile of configFiles) {
     // configFile is the path to 'production/config.toml'
@@ -96,6 +112,58 @@ async function createNodesInternal(
       },
       [runCommandTargetName]: {
         executor: '@gridatek/nx-supabase:run-command',
+        dependsOn: [buildTargetName],
+      },
+      [statusTargetName]: {
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase status',
+        },
+        dependsOn: [buildTargetName],
+      },
+      [dbResetTargetName]: {
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase db reset',
+        },
+        dependsOn: [buildTargetName],
+      },
+      [dbPushTargetName]: {
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase db push',
+        },
+        dependsOn: [buildTargetName],
+      },
+      [dbPullTargetName]: {
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase db pull',
+        },
+        dependsOn: [buildTargetName],
+      },
+      [genTypesTargetName]: {
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase gen types typescript',
+        },
+        dependsOn: [buildTargetName],
+      },
+      [migrationNewTargetName]: {
+        executor: '@gridatek/nx-supabase:run-command',
+        dependsOn: [buildTargetName],
+      },
+      [linkTargetName]: {
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase link',
+        },
+      },
+      [dbDiffTargetName]: {
+        executor: '@gridatek/nx-supabase:run-command',
+        options: {
+          command: 'supabase db diff',
+        },
         dependsOn: [buildTargetName],
       },
     };
