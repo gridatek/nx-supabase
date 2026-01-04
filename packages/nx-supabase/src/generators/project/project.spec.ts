@@ -22,8 +22,7 @@ describe('project generator', () => {
 
   it('should create default directory structure', async () => {
     await projectGenerator(tree, options);
-    expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/production/seeds/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/production/.gitkeep')).toBeTruthy();
     expect(tree.exists('test/.generated/.gitkeep')).toBeTruthy();
   });
 
@@ -50,7 +49,7 @@ describe('project generator', () => {
     await projectGenerator(tree, optionsWithDir);
     const config = readProjectConfiguration(tree, 'test');
     expect(config.root).toBe('apps/my-api/supabase');
-    expect(tree.exists('apps/my-api/supabase/production/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('apps/my-api/supabase/production/.gitkeep')).toBeTruthy();
   });
 
   it('should create project configuration without explicit targets', async () => {
@@ -65,8 +64,7 @@ describe('project generator', () => {
 
   it('should create default local environment', async () => {
     await projectGenerator(tree, options);
-    expect(tree.exists('test/local/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/local/seeds/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/local/.gitkeep')).toBeTruthy();
   });
 
   it('should create additional environments beyond production and local', async () => {
@@ -77,16 +75,12 @@ describe('project generator', () => {
     await projectGenerator(tree, optionsWithEnvs);
 
     // Production and local should always be created
-    expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/production/seeds/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/local/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/local/seeds/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/production/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/local/.gitkeep')).toBeTruthy();
 
     // Additional environments should also be created
-    expect(tree.exists('test/staging/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/staging/seeds/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/dev/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/dev/seeds/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/staging/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/dev/.gitkeep')).toBeTruthy();
   });
 
   it('should skip project.json when skipProjectJson is true', async () => {
@@ -100,8 +94,8 @@ describe('project generator', () => {
     expect(tree.exists('test/project.json')).toBeFalsy();
 
     // Should still create directory structure
-    expect(tree.exists('test/production/migrations/.gitkeep')).toBeTruthy();
-    expect(tree.exists('test/local/migrations/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/production/.gitkeep')).toBeTruthy();
+    expect(tree.exists('test/local/.gitkeep')).toBeTruthy();
     expect(tree.exists('test/.gitignore')).toBeTruthy();
     expect(tree.exists('test/README.md')).toBeTruthy();
 

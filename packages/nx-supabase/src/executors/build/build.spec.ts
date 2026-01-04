@@ -25,19 +25,16 @@ describe('Build Executor', () => {
     mkdirSync(join(projectRoot, 'production', 'seeds'), { recursive: true });
     mkdirSync(join(projectRoot, 'local', 'migrations'), { recursive: true });
     mkdirSync(join(projectRoot, 'local', 'seeds'), { recursive: true });
-    mkdirSync(join(projectRoot, 'production', 'migrations'), { recursive: true });
 
-    // Create default files
-    writeFileSync(join(projectRoot, 'production', 'config.toml'), 'default config');
+    // Create production files
+    writeFileSync(join(projectRoot, 'production', 'config.toml'), 'project_id = "test-project"\n[other]\nconfig = "production"');
     writeFileSync(join(projectRoot, 'production', 'migrations', '001_init.sql'), 'default migration');
+    writeFileSync(join(projectRoot, 'production', 'migrations', '002_prod.sql'), 'prod migration');
     writeFileSync(join(projectRoot, 'production', 'seeds', 'data.sql'), 'default seed');
 
-    // Create environment-specific files
-    writeFileSync(join(projectRoot, 'local', 'config.toml'), 'local config');
+    // Create local environment-specific files
+    writeFileSync(join(projectRoot, 'local', 'config.toml'), 'project_id = "test-project"\n[other]\nconfig = "local"');
     writeFileSync(join(projectRoot, 'local', 'migrations', '002_local.sql'), 'local migration');
-
-    writeFileSync(join(projectRoot, 'production', 'config.toml'), 'production config');
-    writeFileSync(join(projectRoot, 'production', 'migrations', '002_prod.sql'), 'prod migration');
 
     context = {
       root: testRoot,
@@ -89,7 +86,8 @@ describe('Build Executor', () => {
 
     // Check local environment has both default and local files
     const localConfig = readFileSync(join(projectRoot, '.generated', 'local', 'supabase', 'config.toml'), 'utf-8');
-    expect(localConfig).toBe('local config'); // Environment-specific overrides default
+    expect(localConfig).toContain('project_id = "test-project-local"'); // Environment-specific overrides default with env suffix
+    expect(localConfig).toContain('config = "local"');
 
     const defaultMigration = readFileSync(join(projectRoot, '.generated', 'local', 'supabase', 'migrations', '001_init.sql'), 'utf-8');
     expect(defaultMigration).toBe('default migration');
@@ -112,7 +110,8 @@ describe('Build Executor', () => {
 
     // Verify production files were built correctly
     const prodConfig = readFileSync(join(projectRoot, '.generated', 'production', 'supabase', 'config.toml'), 'utf-8');
-    expect(prodConfig).toBe('production config');
+    expect(prodConfig).toContain('project_id = "test-project-production"'); // project_id updated with env suffix
+    expect(prodConfig).toContain('config = "production"');
 
     const prodMigration = readFileSync(join(projectRoot, '.generated', 'production', 'supabase', 'migrations', '002_prod.sql'), 'utf-8');
     expect(prodMigration).toBe('prod migration');
