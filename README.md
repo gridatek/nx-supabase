@@ -202,8 +202,14 @@ npx nx run <project>:db-push
 # Pull schema from remote
 npx nx run <project>:db-pull
 
-# Generate TypeScript types
+# Generate TypeScript types (from local database)
 npx nx run <project>:gen-types
+
+# Generate types with custom output path
+npx nx run <project>:gen-types --outputPath=libs/project-name/src/database.types.ts
+
+# Generate types from remote project
+npx nx run <project>:gen-types --projectId=your-project-id
 
 # Create a new migration (pass name via command option)
 npx nx run <project>:migration-new --command="supabase migration new my_table"
@@ -367,6 +373,7 @@ You can customize target names if needed:
         "dbPushTargetName": "db-push",
         "dbPullTargetName": "db-pull",
         "genTypesTargetName": "gen-types",
+        "genTypesOutputPath": "database.types.ts",
         "migrationNewTargetName": "migration-new",
         "linkTargetName": "link",
         "dbDiffTargetName": "db-diff",

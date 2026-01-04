@@ -11,6 +11,7 @@ Complete API documentation for @gridatek/nx-supabase
   - [build](#build-executor)
   - [start](#start-executor)
   - [stop](#stop-executor)
+  - [gen-types](#gen-types-executor)
   - [run-command](#run-command-executor)
 - [Plugin Options](#plugin-options)
 
@@ -336,6 +337,82 @@ npx nx run my-api:stop --env=production
 
 ---
 
+### gen-types Executor
+
+Generates TypeScript types from your Supabase database schema.
+
+**Usage:**
+
+```bash
+npx nx run <project>:gen-types [options]
+```
+
+**Schema:**
+
+```typescript
+interface GenTypesExecutorSchema {
+  projectId?: string;   // Remote project ID (if not provided, uses local)
+  outputPath?: string;  // Output file path (default: 'database.types.ts')
+  schema?: string;      // Comma-separated list of schemas (e.g., 'public,auth')
+}
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--projectId` | `string` | - | Supabase project ID. If not provided, generates types from local database |
+| `--outputPath` | `string` | `'database.types.ts'` | Output file path relative to workspace root |
+| `--schema` | `string` | - | Comma-separated list of schemas to include (e.g., 'public,auth') |
+
+**Behavior:**
+
+1. Runs `build` target first (via `dependsOn`)
+2. Determines mode based on `projectId`:
+   - **Local mode** (no projectId): Uses `.generated/local/supabase/` directory
+   - **Remote mode** (with projectId): Uses project root directory
+3. Validates environment directory exists (local mode only)
+4. Executes `supabase gen types typescript` with appropriate flags
+5. Captures stdout and writes to output file
+6. Creates output directory if needed
+
+**Examples:**
+
+```bash
+# Generate types from local database (default)
+npx nx run my-api:gen-types
+
+# Generate types with custom output path
+npx nx run my-api:gen-types --outputPath=src/types/database.types.ts
+
+# Generate types from remote project
+npx nx run my-api:gen-types --projectId=abcdefghijklmnop
+
+# Generate types for specific schemas
+npx nx run my-api:gen-types --schema=public,auth
+
+# Combine options
+npx nx run my-api:gen-types \
+  --projectId=abcdefghijklmnop \
+  --outputPath=libs/shared/types/src/database.types.ts \
+  --schema=public
+```
+
+**Notes:**
+
+- For local mode, ensure Supabase is running (`nx run <project>:start`)
+- For remote mode, ensure you're authenticated (`supabase login`)
+- Output file is relative to workspace root, not project root
+- The executor automatically creates parent directories if they don't exist
+
+**Error Handling:**
+
+- Returns `{ success: false }` if local environment doesn't exist
+- Suggests running `build` target if `.generated/local` is missing
+- Returns failure if Supabase CLI command fails
+
+---
+
 ### run-command Executor
 
 Runs any arbitrary Supabase CLI command in the appropriate environment context.
@@ -383,9 +460,6 @@ npx nx run my-api:run-command --command="supabase migration new create_users"
 # Reset database
 npx nx run my-api:run-command --command="supabase db reset"
 
-# Generate TypeScript types
-npx nx run my-api:run-command --command="supabase gen types typescript --local"
-
 # Run migration up
 npx nx run my-api:run-command --command="supabase db push"
 
@@ -410,7 +484,7 @@ npx nx run my-api:run-command \
 | `supabase db push` | Apply pending migrations |
 | `supabase db diff` | Show SQL diff |
 | `supabase migration new <name>` | Create new migration |
-| `supabase gen types typescript` | Generate TypeScript types |
+| `supabase gen types typescript` | Generate TypeScript types (prefer using `gen-types` executor) |
 | `supabase functions new <name>` | Create new Edge Function |
 | `supabase link --project-ref <ref>` | Link to remote project |
 
@@ -435,6 +509,15 @@ interface SupabasePluginOptions {
   startTargetName?: string;
   stopTargetName?: string;
   runCommandTargetName?: string;
+  statusTargetName?: string;
+  dbResetTargetName?: string;
+  dbPushTargetName?: string;
+  dbPullTargetName?: string;
+  genTypesTargetName?: string;
+  genTypesOutputPath?: string;
+  migrationNewTargetName?: string;
+  linkTargetName?: string;
+  dbDiffTargetName?: string;
 }
 ```
 
@@ -446,6 +529,15 @@ interface SupabasePluginOptions {
 | `startTargetName` | `string` | `'start'` | Name of the start target |
 | `stopTargetName` | `string` | `'stop'` | Name of the stop target |
 | `runCommandTargetName` | `string` | `'run-command'` | Name of the run-command target |
+| `statusTargetName` | `string` | `'status'` | Name of the status target |
+| `dbResetTargetName` | `string` | `'db-reset'` | Name of the db-reset target |
+| `dbPushTargetName` | `string` | `'db-push'` | Name of the db-push target |
+| `dbPullTargetName` | `string` | `'db-pull'` | Name of the db-pull target |
+| `genTypesTargetName` | `string` | `'gen-types'` | Name of the gen-types target |
+| `genTypesOutputPath` | `string` | `'database.types.ts'` | Default output path for generated types |
+| `migrationNewTargetName` | `string` | `'migration-new'` | Name of the migration-new target |
+| `linkTargetName` | `string` | `'link'` | Name of the link target |
+| `dbDiffTargetName` | `string` | `'db-diff'` | Name of the db-diff target |
 
 **Example Configuration:**
 
@@ -458,6 +550,8 @@ interface SupabasePluginOptions {
         "buildTargetName": "supabase-build",
         "startTargetName": "supabase-start",
         "stopTargetName": "supabase-stop",
+        "genTypesTargetName": "generate-types",
+        "genTypesOutputPath": "libs/shared/types/src/database.types.ts",
         "runCommandTargetName": "supabase"
       }
     }
@@ -595,9 +689,9 @@ Override inferred targets in `project.json`:
       }
     },
     "types": {
-      "executor": "@gridatek/nx-supabase:run-command",
+      "executor": "@gridatek/nx-supabase:gen-types",
       "options": {
-        "command": "supabase gen types typescript --local > types/database.ts"
+        "outputPath": "types/database.ts"
       }
     }
   }
