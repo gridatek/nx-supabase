@@ -1,5 +1,5 @@
 import { ExecutorContext, logger } from '@nx/devkit';
-import { existsSync, readdirSync, mkdirSync, copyFileSync, rmSync } from 'fs';
+import { existsSync, readdirSync, mkdirSync, copyFileSync, rmSync, readFileSync, writeFileSync } from 'fs';
 import { join, basename } from 'path';
 import { BuildExecutorSchema } from './schema';
 
@@ -69,6 +69,9 @@ const runExecutor = async (
     // Copy environment-specific files (overwrites production files if they exist)
     syncDirectory(envDir, supabaseDir);
 
+    // Update project_id in config.toml for non-production environments
+    updateProjectId(supabaseDir, env);
+
     logger.info(`✓ Built ${env} to .generated/${env}/supabase`);
   }
 
@@ -103,6 +106,32 @@ function syncDirectory(source: string, destination: string): void {
       }
       copyFileSync(sourcePath, destPath);
     }
+  }
+}
+
+/**
+ * Updates the project_id in config.toml to include environment suffix
+ */
+function updateProjectId(supabaseDir: string, env: string): void {
+  const configPath = join(supabaseDir, 'config.toml');
+
+  if (!existsSync(configPath)) {
+    return;
+  }
+
+  try {
+    let configContent = readFileSync(configPath, 'utf-8');
+
+    // Update project_id to include environment suffix
+    // Match: project_id = "some-id"
+    configContent = configContent.replace(
+      /^(project_id\s*=\s*"[^"]+?)(")/m,
+      `$1-${env}$2`
+    );
+
+    writeFileSync(configPath, configContent, 'utf-8');
+  } catch (error) {
+    logger.warn(`Failed to update project_id in ${configPath}: ${error}`);
   }
 }
 
