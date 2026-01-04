@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Gen Types executor",
+  "description": "Generates TypeScript types from Supabase schema",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string",
+      "description": "Supabase project ID. If not provided, generates types from local database."
+    },
+    "outputPath": {
+      "type": "string",
+      "default": "database.types.ts",
+      "description": "Output file path relative to workspace root. Defaults to 'database.types.ts'."
+    },
+    "schema": {
+      "type": "string",
+      "description": "Comma-separated list of schemas to include (e.g., 'public,auth'). If not provided, uses default schema."
+    }
+  },
+  "required": []
+}

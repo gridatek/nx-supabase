@@ -9,6 +9,11 @@
       "implementation": "./dist/executors/build/build",
       "schema": "./dist/executors/build/schema.json",
       "description": "build executor"
+    },
+    "gen-types": {
+      "implementation": "./dist/executors/gen-types/gen-types",
+      "schema": "./dist/executors/gen-types/schema.json",
+      "description": "Generates TypeScript types from Supabase schema"
     }
   }
 }
