@@ -18,6 +18,7 @@ export interface SupabasePluginOptions {
   dbPushTargetName?: string;
   dbPullTargetName?: string;
   genTypesTargetName?: string;
+  genTypesOutputPath?: string;
   migrationNewTargetName?: string;
   linkTargetName?: string;
   dbDiffTargetName?: string;
@@ -50,6 +51,7 @@ async function createNodesInternal(
   const dbPushTargetName = options?.dbPushTargetName ?? 'db-push';
   const dbPullTargetName = options?.dbPullTargetName ?? 'db-pull';
   const genTypesTargetName = options?.genTypesTargetName ?? 'gen-types';
+  const genTypesOutputPath = options?.genTypesOutputPath ?? 'database.types.ts';
   const migrationNewTargetName = options?.migrationNewTargetName ?? 'migration-new';
   const linkTargetName = options?.linkTargetName ?? 'link';
   const dbDiffTargetName = options?.dbDiffTargetName ?? 'db-diff';
@@ -143,9 +145,9 @@ async function createNodesInternal(
         dependsOn: [buildTargetName],
       },
       [genTypesTargetName]: {
-        executor: '@gridatek/nx-supabase:run-command',
+        executor: '@gridatek/nx-supabase:gen-types',
         options: {
-          command: 'supabase gen types typescript',
+          outputPath: genTypesOutputPath,
         },
         dependsOn: [buildTargetName],
       },
