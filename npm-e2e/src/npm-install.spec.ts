@@ -410,8 +410,8 @@ describe('@gridatek/nx-supabase npm installation', () => {
       const projectPath1 = join(projectDirectory, projectName1);
       const projectPath2 = join(projectDirectory, projectName2);
 
-      expect(existsSync(join(projectPath1, '.generated', 'local', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath2, '.generated', 'local', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath1, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath2, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
     });
   });
 

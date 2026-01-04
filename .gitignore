@@ -48,3 +48,7 @@ test-output
 
 # E2E test artifacts
 e2e/test-project
+
+# Package files
+packages/nx-supabase/LICENSE
+packages/nx-supabase/README.md

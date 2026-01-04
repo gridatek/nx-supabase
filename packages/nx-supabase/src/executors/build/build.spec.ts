@@ -27,7 +27,7 @@ describe('Build Executor', () => {
     mkdirSync(join(projectRoot, 'local', 'seeds'), { recursive: true });
 
     // Create production files
-    writeFileSync(join(projectRoot, 'production', 'config.toml'), 'project_id = "test-project"\n[other]\nconfig = "production"');
+    writeFileSync(join(projectRoot, 'production', 'config.toml'), 'project_id = "test-project-production"\n[other]\nconfig = "production"');
     writeFileSync(join(projectRoot, 'production', 'migrations', '001_init.sql'), 'default migration');
     writeFileSync(join(projectRoot, 'production', 'migrations', '002_prod.sql'), 'prod migration');
     writeFileSync(join(projectRoot, 'production', 'seeds', 'data.sql'), 'default seed');
