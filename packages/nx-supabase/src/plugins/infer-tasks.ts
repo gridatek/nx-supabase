@@ -177,6 +177,10 @@ async function createNodesInternal(
       const projectIdMatch = configContent.match(/project_id\s*=\s*"([^"]+)"/);
       if (projectIdMatch && projectIdMatch[1]) {
         projectName = projectIdMatch[1];
+        // Strip -production suffix to get the base project name
+        if (projectName.endsWith('-production')) {
+          projectName = projectName.slice(0, -'-production'.length);
+        }
       }
     } catch {
       // If we can't read the config, skip this project

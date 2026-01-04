@@ -123,11 +123,20 @@ function updateProjectId(supabaseDir: string, env: string): void {
     let configContent = readFileSync(configPath, 'utf-8');
 
     // Update project_id to include environment suffix
-    // Match: project_id = "some-id"
-    configContent = configContent.replace(
-      /^(project_id\s*=\s*"[^"]+?)(")/m,
-      `$1-${env}$2`
-    );
+    // For production environment, keep as-is (already has -production)
+    // For other environments, strip -production suffix first, then add environment suffix
+    if (env !== 'production') {
+      configContent = configContent.replace(
+        /^(project_id\s*=\s*")([^"]+)(")/m,
+        (match, prefix, projectId, suffix) => {
+          // Strip -production suffix before adding the environment suffix
+          if (projectId.endsWith('-production')) {
+            projectId = projectId.slice(0, -'-production'.length);
+          }
+          return `${prefix}${projectId}-${env}${suffix}`;
+        }
+      );
+    }
 
     writeFileSync(configPath, configContent, 'utf-8');
   } catch (error) {
