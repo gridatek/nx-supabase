@@ -136,13 +136,11 @@ nx run ${options.name}:run-command --env=local --command="supabase db remote com
 
   // Always create production directory (base configuration)
   logger.info('Creating production environment (base configuration)...');
-  tree.write(`${projectRoot}/production/migrations/.gitkeep`, '');
-  tree.write(`${projectRoot}/production/seeds/.gitkeep`, '');
+  tree.write(`${projectRoot}/production/.gitkeep`, '');
 
   // Always create local environment (default dev environment)
   logger.info('Creating local environment...');
-  tree.write(`${projectRoot}/local/migrations/.gitkeep`, '');
-  tree.write(`${projectRoot}/local/seeds/.gitkeep`, '');
+  tree.write(`${projectRoot}/local/.gitkeep`, '');
 
   // Parse additional environments from comma-separated string (beyond production and local)
   const additionalEnvs = options.environments
@@ -155,14 +153,7 @@ nx run ${options.name}:run-command --env=local --command="supabase db remote com
   // Create each additional environment as empty directories
   for (const envName of additionalEnvs) {
     logger.info(`Creating ${envName} environment...`);
-    const envDirectories = [
-      `${projectRoot}/${envName}/migrations`,
-      `${projectRoot}/${envName}/seeds`,
-    ];
-
-    for (const dir of envDirectories) {
-      tree.write(`${dir}/.gitkeep`, '');
-    }
+    tree.write(`${projectRoot}/${envName}/.gitkeep`, '');
   }
 
   // Build complete list of all environments for logging purposes
