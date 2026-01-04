@@ -93,20 +93,16 @@ npx nx run my-supabase:stop
 ```
 my-supabase/
 ├── production/              # Production environment (base configuration)
-│   ├── config.toml          # Main Supabase configuration
-│   ├── migrations/          # Production migrations
-│   │   └── 001_init.sql
-│   └── seeds/               # Production seed data
-│       └── data.sql
-├── local/                   # Local development overrides
-│   ├── migrations/          # Local-only migrations (optional)
-│   └── seeds/               # Local-only seed data (optional)
+│   └── config.toml          # Main Supabase configuration
+├── local/                   # Local development overrides (empty by default)
 ├── .generated/              # AUTO-GENERATED (do not edit)
 │   └── local/               # Built local config (production + local overrides)
 ├── .gitignore               # Ignores .generated/
 ├── README.md                # Project documentation
 └── project.json             # Nx targets (optional with inferred tasks)
 ```
+
+**Note:** Create `migrations/` and `seeds/` directories in each environment as needed.
 
 ## How It Works
 

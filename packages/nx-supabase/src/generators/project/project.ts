@@ -60,16 +60,14 @@ export async function projectGenerator(
 ${projectRoot}/
 ├── project.json           # Nx targets
 ├── production/            # Production environment (base configuration)
-│   ├── config.toml        # Main Supabase configuration
-│   ├── migrations/        # Production migrations
-│   └── seeds/             # Production seeds
-├── local/                 # Local development overrides
-│   ├── migrations/        # Local-only migrations (optional)
-│   └── seeds/             # Local-only seeds (optional)
+│   └── config.toml        # Main Supabase configuration
+├── local/                 # Local development overrides (empty by default)
 └── .generated/            # AUTO-GENERATED (never edit manually)
     ├── production/        # Built production config
     └── local/             # Built local config (production + local overrides)
 \`\`\`
+
+**Note:** Create \`migrations/\` and \`seeds/\` directories in each environment as needed.
 
 ## How it Works
 
