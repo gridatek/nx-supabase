@@ -603,7 +603,7 @@ describe('@gridatek/nx-supabase', () => {
         // Verify migrated table exists
         console.log('Verifying migrated table exists...');
         const usersTableBefore = execSync(
-          `docker exec -i supabase_db_${projectName}-production psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
+          `docker exec -i supabase_db_${projectName}-local psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
           {
             cwd: projectDirectory,
             encoding: 'utf-8',
@@ -636,7 +636,7 @@ describe('@gridatek/nx-supabase', () => {
         // Verify migrated table still exists (reset re-runs migrations)
         console.log('Verifying migrated table still exists after reset...');
         const usersTableAfter = execSync(
-          `docker exec -i supabase_db_${projectName}-production psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
+          `docker exec -i supabase_db_${projectName}-local psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
           {
             cwd: projectDirectory,
             encoding: 'utf-8',
