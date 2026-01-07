@@ -218,4 +218,181 @@ describe('Supabase Plugin - Inferred Tasks', () => {
     expect(project.targets?.build?.inputs).not.toContain('{projectRoot}/.generated/**/*');
     expect(project.targets?.build?.inputs).not.toContain('{projectRoot}/.git/**/*');
   });
+
+  it('should use default genTypesOutputPath when no options provided', async () => {
+    const projectRoot = 'default-types';
+    const productionDir = join(tempDir, projectRoot, 'production');
+
+    mkdirSync(join(productionDir), { recursive: true });
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "default-types-project"');
+
+    const [, handler] = createNodesV2;
+    const results = await handler(
+      [join(projectRoot, 'production', 'config.toml')],
+      undefined,
+      context
+    );
+
+    const [, result] = results[0];
+    expect(result.projects).toBeDefined();
+
+    if (!result.projects) {
+      throw new Error('Projects should be defined');
+    }
+    const project = result.projects[projectRoot];
+
+    // Verify default genTypesOutputPath is used
+    expect(project.targets?.['gen-types']?.options?.outputPath).toBe('database.types.ts');
+  });
+
+  it('should use global genTypesOutputPath from options', async () => {
+    const projectRoot = 'global-types';
+    const productionDir = join(tempDir, projectRoot, 'production');
+
+    mkdirSync(join(productionDir), { recursive: true });
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "global-types-project"');
+
+    const [, handler] = createNodesV2;
+    const results = await handler(
+      [join(projectRoot, 'production', 'config.toml')],
+      {
+        genTypesOutputPath: 'libs/shared/database.types.ts',
+      },
+      context
+    );
+
+    const [, result] = results[0];
+    expect(result.projects).toBeDefined();
+
+    if (!result.projects) {
+      throw new Error('Projects should be defined');
+    }
+    const project = result.projects[projectRoot];
+
+    // Verify global genTypesOutputPath is used
+    expect(project.targets?.['gen-types']?.options?.outputPath).toBe('libs/shared/database.types.ts');
+  });
+
+  it('should use project-specific genTypesOutputPath over global config', async () => {
+    const projectRoot = 'project-specific-types';
+    const productionDir = join(tempDir, projectRoot, 'production');
+
+    mkdirSync(join(productionDir), { recursive: true });
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "project-specific-types-production"');
+
+    const [, handler] = createNodesV2;
+    const results = await handler(
+      [join(projectRoot, 'production', 'config.toml')],
+      {
+        genTypesOutputPath: 'libs/shared/database.types.ts',
+        projects: {
+          'project-specific-types': {
+            genTypesOutputPath: 'libs/project-specific/database.types.ts',
+          },
+        },
+      },
+      context
+    );
+
+    const [, result] = results[0];
+    expect(result.projects).toBeDefined();
+
+    if (!result.projects) {
+      throw new Error('Projects should be defined');
+    }
+    const project = result.projects[projectRoot];
+
+    // Verify project-specific genTypesOutputPath overrides global config
+    expect(project.targets?.['gen-types']?.options?.outputPath).toBe('libs/project-specific/database.types.ts');
+  });
+
+  it('should support different genTypesOutputPath for multiple projects', async () => {
+    // Create first project
+    const projectRoot1 = 'api';
+    const productionDir1 = join(tempDir, projectRoot1, 'production');
+    mkdirSync(join(productionDir1), { recursive: true });
+    writeFileSync(join(productionDir1, 'config.toml'), 'project_id = "api-production"');
+
+    // Create second project
+    const projectRoot2 = 'admin';
+    const productionDir2 = join(tempDir, projectRoot2, 'production');
+    mkdirSync(join(productionDir2), { recursive: true });
+    writeFileSync(join(productionDir2, 'config.toml'), 'project_id = "admin-production"');
+
+    const [, handler] = createNodesV2;
+    const results = await handler(
+      [
+        join(projectRoot1, 'production', 'config.toml'),
+        join(projectRoot2, 'production', 'config.toml'),
+      ],
+      {
+        genTypesOutputPath: 'database.types.ts',
+        projects: {
+          'api': {
+            genTypesOutputPath: 'libs/api-types/src/database.types.ts',
+          },
+          'admin': {
+            genTypesOutputPath: 'libs/admin-types/src/database.types.ts',
+          },
+        },
+      },
+      context
+    );
+
+    expect(results).toHaveLength(2);
+
+    // Check first project
+    const [, result1] = results[0];
+    expect(result1.projects).toBeDefined();
+    if (!result1.projects) {
+      throw new Error('Projects should be defined');
+    }
+    const project1 = result1.projects[projectRoot1];
+    expect(project1.targets?.['gen-types']?.options?.outputPath).toBe('libs/api-types/src/database.types.ts');
+
+    // Check second project
+    const [, result2] = results[1];
+    expect(result2.projects).toBeDefined();
+    if (!result2.projects) {
+      throw new Error('Projects should be defined');
+    }
+    const project2 = result2.projects[projectRoot2];
+    expect(project2.targets?.['gen-types']?.options?.outputPath).toBe('libs/admin-types/src/database.types.ts');
+  });
+
+  it('should strip -production suffix from project_id when matching project config', async () => {
+    const projectRoot = 'suffix-test';
+    const productionDir = join(tempDir, projectRoot, 'production');
+
+    mkdirSync(join(productionDir), { recursive: true });
+    // Note: project_id has -production suffix
+    writeFileSync(join(productionDir, 'config.toml'), 'project_id = "my-project-production"');
+
+    const [, handler] = createNodesV2;
+    const results = await handler(
+      [join(projectRoot, 'production', 'config.toml')],
+      {
+        genTypesOutputPath: 'default.types.ts',
+        projects: {
+          // Config key should NOT have -production suffix
+          'my-project': {
+            genTypesOutputPath: 'custom.types.ts',
+          },
+        },
+      },
+      context
+    );
+
+    const [, result] = results[0];
+    expect(result.projects).toBeDefined();
+
+    if (!result.projects) {
+      throw new Error('Projects should be defined');
+    }
+    const project = result.projects[projectRoot];
+
+    // Verify the -production suffix was stripped and project config was matched
+    expect(project.name).toBe('my-project');
+    expect(project.targets?.['gen-types']?.options?.outputPath).toBe('custom.types.ts');
+  });
 });

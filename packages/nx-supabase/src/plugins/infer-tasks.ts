@@ -8,6 +8,10 @@ import { dirname } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
+export interface SupabaseProjectOptions {
+  genTypesOutputPath?: string;
+}
+
 export interface SupabasePluginOptions {
   buildTargetName?: string;
   startTargetName?: string;
@@ -22,6 +26,7 @@ export interface SupabasePluginOptions {
   migrationNewTargetName?: string;
   linkTargetName?: string;
   dbDiffTargetName?: string;
+  projects?: Record<string, SupabaseProjectOptions>;
 }
 
 /**
@@ -51,7 +56,6 @@ async function createNodesInternal(
   const dbPushTargetName = options?.dbPushTargetName ?? 'db-push';
   const dbPullTargetName = options?.dbPullTargetName ?? 'db-pull';
   const genTypesTargetName = options?.genTypesTargetName ?? 'gen-types';
-  const genTypesOutputPath = options?.genTypesOutputPath ?? 'database.types.ts';
   const migrationNewTargetName = options?.migrationNewTargetName ?? 'migration-new';
   const linkTargetName = options?.linkTargetName ?? 'link';
   const dbDiffTargetName = options?.dbDiffTargetName ?? 'db-diff';
@@ -67,6 +71,37 @@ async function createNodesInternal(
     if (!existsSync(configFullPath)) {
       continue;
     }
+
+    // Extract project name from config.toml project_id FIRST
+    // so we can determine per-project configuration
+    let projectName: string | undefined;
+    try {
+      const configContent = readFileSync(configFullPath, 'utf-8');
+      const projectIdMatch = configContent.match(/project_id\s*=\s*"([^"]+)"/);
+      if (projectIdMatch && projectIdMatch[1]) {
+        projectName = projectIdMatch[1];
+        // Strip -production suffix to get the base project name
+        if (projectName.endsWith('-production')) {
+          projectName = projectName.slice(0, -'-production'.length);
+        }
+      }
+    } catch {
+      // If we can't read the config, skip this project
+      continue;
+    }
+
+    // If we couldn't extract a project name, skip this project
+    if (!projectName) {
+      continue;
+    }
+
+    // Determine genTypesOutputPath for this project
+    // Priority: project-specific config > global config > default
+    const projectConfig = options?.projects?.[projectName];
+    const genTypesOutputPath =
+      projectConfig?.genTypesOutputPath ??
+      options?.genTypesOutputPath ??
+      'database.types.ts';
 
     // Get environment directories (all dirs except '.generated' and hidden dirs)
     // Note: 'production' is both the base config AND an environment
@@ -169,28 +204,6 @@ async function createNodesInternal(
         dependsOn: [buildTargetName],
       },
     };
-
-    // Extract project name from config.toml project_id
-    let projectName: string | undefined;
-    try {
-      const configContent = readFileSync(configFullPath, 'utf-8');
-      const projectIdMatch = configContent.match(/project_id\s*=\s*"([^"]+)"/);
-      if (projectIdMatch && projectIdMatch[1]) {
-        projectName = projectIdMatch[1];
-        // Strip -production suffix to get the base project name
-        if (projectName.endsWith('-production')) {
-          projectName = projectName.slice(0, -'-production'.length);
-        }
-      }
-    } catch {
-      // If we can't read the config, skip this project
-      continue;
-    }
-
-    // If we couldn't extract a project name, skip this project
-    if (!projectName) {
-      continue;
-    }
 
     // Add result for this config file
     results.push([

@@ -353,7 +353,7 @@ npx nx run my-app:start
 
 ### Plugin Options (nx.json)
 
-You can customize target names if needed:
+You can customize target names and configure global defaults:
 
 ```json
 {
@@ -378,6 +378,48 @@ You can customize target names if needed:
     }
   ]
 }
+```
+
+### Per-Project Configuration
+
+You can configure different `genTypesOutputPath` for each project in your monorepo:
+
+```json
+{
+  "plugins": [
+    {
+      "plugin": "@gridatek/nx-supabase",
+      "options": {
+        "genTypesOutputPath": "database.types.ts",
+        "projects": {
+          "my-api": {
+            "genTypesOutputPath": "libs/api-types/src/database.types.ts"
+          },
+          "admin": {
+            "genTypesOutputPath": "libs/admin-types/src/database.types.ts"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+**Configuration Priority:**
+1. Project-specific configuration in `options.projects[projectName]`
+2. Global configuration in `options.genTypesOutputPath`
+3. Default: `database.types.ts`
+
+**Example:**
+```bash
+# Generate types for my-api (uses libs/api-types/src/database.types.ts)
+npx nx run my-api:gen-types
+
+# Generate types for admin (uses libs/admin-types/src/database.types.ts)
+npx nx run admin:gen-types
+
+# Override at runtime
+npx nx run my-api:gen-types --outputPath=custom/path.ts
 ```
 
 ### Supabase Configuration
