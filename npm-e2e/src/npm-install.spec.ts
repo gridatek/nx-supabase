@@ -65,13 +65,9 @@ describe('@gridatek/nx-supabase npm installation', () => {
       const projectPath = join(projectDirectory, projectName);
       expect(existsSync(projectPath)).toBe(true);
 
-      // Verify default directories exist
-      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, 'production', 'seeds'))).toBe(true);
-
-      // Verify local environment was created
-      expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, 'local', 'seeds'))).toBe(true);
+      // Verify default environment directories exist
+      expect(existsSync(join(projectPath, 'production'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local'))).toBe(true);
 
       // Verify README exists
       expect(existsSync(join(projectPath, 'README.md'))).toBe(true);
@@ -117,12 +113,12 @@ describe('@gridatek/nx-supabase npm installation', () => {
       const projectPath = join(projectDirectory, projectName);
 
       // Verify production and local are always created
-      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local'))).toBe(true);
 
       // Verify additional environments were created
-      expect(existsSync(join(projectPath, 'staging', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, 'development', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'staging'))).toBe(true);
+      expect(existsSync(join(projectPath, 'development'))).toBe(true);
     });
 
     it('should create project in custom directory', () => {
@@ -140,8 +136,8 @@ describe('@gridatek/nx-supabase npm installation', () => {
 
       const projectPath = join(projectDirectory, directory);
       expect(existsSync(projectPath)).toBe(true);
-      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local'))).toBe(true);
       expect(existsSync(join(projectPath, 'project.json'))).toBe(true);
     });
 
@@ -161,8 +157,8 @@ describe('@gridatek/nx-supabase npm installation', () => {
 
       // Verify project structure was created
       expect(existsSync(projectPath)).toBe(true);
-      expect(existsSync(join(projectPath, 'production', 'migrations'))).toBe(true);
-      expect(existsSync(join(projectPath, 'local', 'migrations'))).toBe(true);
+      expect(existsSync(join(projectPath, 'production'))).toBe(true);
+      expect(existsSync(join(projectPath, 'local'))).toBe(true);
 
       // Verify project.json was NOT created
       expect(existsSync(join(projectPath, 'project.json'))).toBe(false);

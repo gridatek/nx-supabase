@@ -545,6 +545,7 @@ describe('@gridatek/nx-supabase', () => {
         // Create a migration file
         const fs = require('fs');
         const migrationsDir = join(projectPath, 'local', 'migrations');
+        fs.mkdirSync(migrationsDir, { recursive: true });
         const migrationFile = join(migrationsDir, '20240101000000_create_users_table.sql');
         fs.writeFileSync(migrationFile, 'CREATE TABLE users (id serial PRIMARY KEY, name text);');
 
