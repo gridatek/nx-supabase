@@ -1,3 +1,14 @@
+## 0.20.0 (2026-01-07)
+
+### 🚀 Features
+
+- **plugin:** add per-project genTypesOutputPath configuration ([8b26510](https://github.com/gridatek/nx-supabase/commit/8b26510))
+
+### ❤️ Thank You
+
+- Claude Sonnet 4.5
+- Khalil LAGRIDA
+
 ## 0.19.0 (2026-01-04)
 
 This was a version bump only, there were no code changes.
