@@ -141,29 +141,6 @@ describe('@gridatek/nx-supabase npm installation', () => {
       expect(existsSync(join(projectPath, 'project.json'))).toBe(true);
     });
 
-    it('should create project without project.json when skipProjectJson is true', () => {
-      const projectName = 'no-project-json-npm';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      const projectPath = join(projectDirectory, projectName);
-
-      // Verify project structure was created
-      expect(existsSync(projectPath)).toBe(true);
-      expect(existsSync(join(projectPath, 'production'))).toBe(true);
-      expect(existsSync(join(projectPath, 'local'))).toBe(true);
-
-      // Verify project.json was NOT created
-      expect(existsSync(join(projectPath, 'project.json'))).toBe(false);
-    });
-
     it('should create multiple projects in the same workspace', () => {
       const projectName1 = 'database-api';
       const projectName2 = 'database-web';
@@ -236,35 +213,6 @@ describe('@gridatek/nx-supabase npm installation', () => {
       expect(existsSync(join(projectPath, '.generated', 'production', 'supabase', 'config.toml'))).toBe(true);
     });
 
-    it('should build project with inferred tasks (without project.json)', () => {
-      const projectName = 'inferred-build-test';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      const projectPath = join(projectDirectory, projectName);
-
-      // Run the build executor (should work via inferred tasks plugin)
-      execSync(
-        `npx nx run ${projectName}:build`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      // Verify build worked and generated files
-      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath, 'production', 'config.toml'))).toBe(true);
-    });
   });
 
   describe('run-command executor', () => {
@@ -301,41 +249,6 @@ describe('@gridatek/nx-supabase npm installation', () => {
       );
 
       // Verify command executed and returned version
-      expect(output).toContain('supabase');
-    });
-
-    it('should work with inferred tasks', () => {
-      const projectName = 'run-command-inferred';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName} --skipProjectJson`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      // Build the project first to generate config files
-      execSync(
-        `npx nx run ${projectName}:build`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      // Run supabase --version command via inferred task
-      const output = execSync(
-        `npx nx run ${projectName}:run-command --command="supabase --version"`,
-        {
-          cwd: projectDirectory,
-          encoding: 'utf-8',
-          env: process.env,
-        }
-      );
-
       expect(output).toContain('supabase');
     });
   });

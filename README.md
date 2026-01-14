@@ -70,7 +70,7 @@ This creates a project with:
 - **production/** - Your production configuration (base for all environments)
 - **local/** - Local development overrides
 - **.generated/** - Auto-generated build outputs
-- **project.json** - Nx project configuration (optional with `--skipProjectJson`)
+- **project.json** - Nx project configuration
 
 ### Start Using Supabase
 
@@ -132,15 +132,13 @@ npx nx g @gridatek/nx-supabase:project <name>
 # With options
 npx nx g @gridatek/nx-supabase:project my-supabase \
   --directory=apps/my-api/supabase \
-  --environments=staging,qa \
-  --skipProjectJson
+  --environments=staging,qa
 # Creates at: apps/my-api/supabase/
 ```
 
 **Options:**
 - `--directory` - Directory where the project will be created (defaults to project name)
 - `--environments` - Comma-separated list of additional environments (beyond production and local)
-- `--skipProjectJson` - Skip creating project.json, rely on inferred tasks plugin
 
 **Default Environments:**
 Production and local are always created. Use `--environments` to add more like staging, qa, dev, etc.
@@ -273,21 +271,11 @@ npx nx run my-api:run-command --env=qa --command="supabase status"
 - `staging/config.toml` - Overrides only the settings different in staging
 - Result: `.generated/staging/` contains merged configuration
 
-## Inferred Tasks (Optional)
+## Inferred Tasks
 
-By default, projects include a `project.json` with explicit targets. You can skip this file and rely entirely on the inferred tasks plugin:
+The plugin automatically infers targets for Supabase projects based on the presence of `production/config.toml`. The project name is read from `project.json`.
 
-```bash
-npx nx g @gridatek/nx-supabase:project my-api --skipProjectJson
-```
-
-Benefits:
-- Less configuration to maintain
-- Automatic task detection
-- Convention over configuration
-- Projects detected by `production/config.toml` presence
-
-The plugin automatically infers these targets:
+The plugin infers these targets:
 - `build` - Build environment configurations
 - `start` - Start Supabase
 - `stop` - Stop Supabase

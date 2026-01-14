@@ -26,18 +26,14 @@ export async function projectGenerator(
 
   logger.info(`Creating Supabase project at ${projectRoot}...`);
 
-  // Add Nx project configuration (unless skipProjectJson is true)
+  // Add Nx project configuration
   // Note: targets (build, start, stop, run-command) are automatically inferred
   // by the plugin when it detects production/config.toml
-  if (!options.skipProjectJson) {
-    addProjectConfiguration(tree, options.name, {
-      root: projectRoot,
-      projectType: 'application',
-      sourceRoot: `${projectRoot}`,
-    });
-  } else {
-    logger.info('Skipping project.json creation - project will be detected by inferred tasks plugin');
-  }
+  addProjectConfiguration(tree, options.name, {
+    root: projectRoot,
+    projectType: 'application',
+    sourceRoot: `${projectRoot}`,
+  });
 
   // Create .generated directory
   tree.write(`${projectRoot}/.generated/.gitkeep`, '');

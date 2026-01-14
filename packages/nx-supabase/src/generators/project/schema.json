@@ -21,11 +21,6 @@
     "environments": {
       "type": "string",
       "description": "Comma-separated list of additional environments to create beyond production and local (e.g., staging,dev)"
-    },
-    "skipProjectJson": {
-      "type": "boolean",
-      "description": "Skip creating project.json and rely on inferred tasks plugin for project detection",
-      "default": false
     }
   },
   "required": ["name"]

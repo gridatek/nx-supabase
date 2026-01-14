@@ -82,7 +82,6 @@ npx nx g @gridatek/nx-supabase:project <name> [options]
 |--------|------|---------|-------------|
 | `--directory` | `string` | project name | Directory where the project will be created. Defaults to project name if not specified |
 | `--environments` | `string` | `undefined` | Comma-separated list of additional environments to create (beyond production and local) |
-| `--skipProjectJson` | `boolean` | `false` | Skip creating project.json and rely on inferred tasks plugin |
 
 **What it creates:**
 
@@ -96,7 +95,7 @@ npx nx g @gridatek/nx-supabase:project <name> [options]
 │   └── .gitkeep
 ├── .gitignore               # Ignores .generated/
 ├── README.md                # Project documentation
-└── project.json             # Nx targets (unless --skipProjectJson)
+└── project.json             # Nx project configuration
 ```
 
 **Note:** The generator creates empty environment directories. Users create `migrations/` and `seeds/` subdirectories as needed.
@@ -123,9 +122,6 @@ npx nx g @gridatek/nx-supabase:project my-supabase \
   --environments=staging,qa,dev
 # Creates at: apps/backend/supabase/
 
-# Using inferred tasks (no project.json)
-npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/backend/supabase --skipProjectJson
-# Creates at: apps/backend/supabase/
 ```
 
 **Environment Behavior:**
@@ -136,7 +132,7 @@ npx nx g @gridatek/nx-supabase:project my-supabase --directory=apps/backend/supa
 
 **Project Configuration:**
 
-When `--skipProjectJson` is false (default), creates a `project.json` with:
+Creates a `project.json` with:
 
 ```json
 {

@@ -295,7 +295,7 @@ ON CONFLICT DO NOTHING;
 **DO commit:**
 - ✅ `production/` directory (all files)
 - ✅ `local/` and other environment directories
-- ✅ `project.json` (if not using `--skipProjectJson`)
+- ✅ `project.json`
 - ✅ `README.md`
 - ✅ `.gitignore`
 
