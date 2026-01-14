@@ -72,27 +72,32 @@ async function createNodesInternal(
       continue;
     }
 
-    // Extract project name from config.toml project_id FIRST
-    // so we can determine per-project configuration
-    let projectName: string | undefined;
-    try {
-      const configContent = readFileSync(configFullPath, 'utf-8');
-      const projectIdMatch = configContent.match(/project_id\s*=\s*"([^"]+)"/);
-      if (projectIdMatch && projectIdMatch[1]) {
-        projectName = projectIdMatch[1];
-        // Strip -production suffix to get the base project name
-        if (projectName.endsWith('-production')) {
-          projectName = projectName.slice(0, -'-production'.length);
-        }
-      }
-    } catch {
-      // If we can't read the config, skip this project
-      continue;
+    // Read project name from project.json
+    const projectJsonPath = join(context.workspaceRoot, projectRoot, 'project.json');
+    if (!existsSync(projectJsonPath)) {
+      throw new Error(
+        `Missing project.json in Supabase project at '${projectRoot}'. ` +
+        `Please create a project.json file with a "name" property.`
+      );
     }
 
-    // If we couldn't extract a project name, skip this project
-    if (!projectName) {
-      continue;
+    let projectName: string;
+    try {
+      const projectJsonContent = readFileSync(projectJsonPath, 'utf-8');
+      const projectJson = JSON.parse(projectJsonContent);
+      if (!projectJson.name || typeof projectJson.name !== 'string') {
+        throw new Error(
+          `Invalid project.json in '${projectRoot}': missing or invalid "name" property.`
+        );
+      }
+      projectName = projectJson.name;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error(
+          `Invalid JSON in project.json at '${projectRoot}': ${error.message}`
+        );
+      }
+      throw error;
     }
 
     // Determine genTypesOutputPath for this project
