@@ -1,3 +1,25 @@
+## 0.21.0 (2026-01-15)
+
+### 🚀 Features
+
+- **plugin:** read project name from project.json instead of config.toml ([42dd65f](https://github.com/gridatek/nx-supabase/commit/42dd65f))
+
+### 🩹 Fixes
+
+- ⚠️  **plugin:** remove skipProjectJson option (project.json is now required) ([62098e4](https://github.com/gridatek/nx-supabase/commit/62098e4))
+
+### ⚠️  Breaking Changes
+
+- **plugin:** remove skipProjectJson option (project.json is now required)  ([62098e4](https://github.com/gridatek/nx-supabase/commit/62098e4))
+  The --skipProjectJson option has been removed from the
+  project generator. All projects now require a project.json file.
+  Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+
+### ❤️ Thank You
+
+- Claude Opus 4.5
+- Khalil LAGRIDA
+
 ## 0.20.0 (2026-01-07)
 
 ### 🚀 Features
