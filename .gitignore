@@ -52,3 +52,6 @@ e2e/test-project
 # Package files
 packages/nx-supabase/LICENSE
 packages/nx-supabase/README.md
+
+.claude/worktrees
+.claude/settings.local.json
