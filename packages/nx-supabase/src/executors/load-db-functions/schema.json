@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Load DB Functions executor",
+  "description": "Loads all SQL files in db_functions/ into a Postgres database (e.g. CREATE OR REPLACE FUNCTION). Uses the pg driver and the simple-query protocol so multi-statement files are supported.",
+  "type": "object",
+  "properties": {
+    "env": {
+      "type": "string",
+      "default": "local",
+      "description": "Environment to use (e.g., local, staging, production). The executor reads SQL from .generated/<env>/supabase/db_functions/ and, for local, reads the DB URL from 'supabase status -o env'."
+    },
+    "functionsDir": {
+      "type": "string",
+      "description": "Override directory containing .sql files. Relative to workspace root if not absolute. Defaults to .generated/<env>/supabase/db_functions under the project root."
+    },
+    "dbUrl": {
+      "type": "string",
+      "description": "Postgres connection string. Overrides $SUPABASE_DB_URL and auto-discovery via 'supabase status'."
+    }
+  },
+  "required": []
+}
