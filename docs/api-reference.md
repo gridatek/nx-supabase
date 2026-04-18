@@ -13,6 +13,7 @@ Complete API documentation for @gridatek/nx-supabase
   - [stop](#stop-executor)
   - [gen-types](#gen-types-executor)
   - [run-command](#run-command-executor)
+  - [push-db-functions](#push-db-functions-executor)
 - [Plugin Options](#plugin-options)
 
 ---
@@ -485,6 +486,85 @@ npx nx run my-api:run-command \
 
 ---
 
+### push-db-functions Executor
+
+Pushes all SQL files in `db_functions/` to a Postgres database. Intended for idempotent definitions (`CREATE OR REPLACE FUNCTION`, `CREATE OR REPLACE VIEW`, RLS policy resets, etc.) that you want re-applied on every deploy without creating a migration.
+
+Unlike `supabase db query --file`, this executor uses the `pg` driver's simple-query protocol, so files containing multiple statements — including function bodies with `$$ ... $$` delimiters — are supported.
+
+**Usage:**
+
+```bash
+npx nx run <project>:push-db-functions [options]
+```
+
+**Schema:**
+
+```typescript
+interface PushDbFunctionsExecutorSchema {
+  env?: string;           // Default: 'local'
+  functionsDir?: string;  // Override directory (relative to workspace root or absolute)
+  dbUrl?: string;         // Postgres connection string
+}
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--env` | `string` | `'local'` | Environment to use. The executor reads SQL from `.generated/<env>/supabase/db_functions/` |
+| `--functionsDir` | `string` | — | Override directory containing `.sql` files. Relative paths resolve from the workspace root |
+| `--dbUrl` | `string` | — | Postgres connection string. Overrides `$SUPABASE_DB_URL` and auto-discovery |
+
+**Behavior:**
+
+1. Runs `build` target first (via `dependsOn`)
+2. Resolves the functions directory (option override, else `.generated/<env>/supabase/db_functions/` under project root)
+3. Resolves the database URL in this order:
+   - `--dbUrl` option
+   - `$SUPABASE_DB_URL` env var
+   - `supabase status -o env` in the environment directory (local mode)
+4. Collects `*.sql` files sorted alphabetically
+5. Connects via `pg.Client`, executes each file as a single simple query, closes the connection
+
+**Examples:**
+
+```bash
+# Push local functions (auto-discovers DB URL from `supabase status`)
+npx nx run my-api:push-db-functions
+
+# Push to staging with explicit URL
+SUPABASE_DB_URL="postgresql://..." npx nx run my-api:push-db-functions --env=staging
+
+# Custom functions directory
+npx nx run my-api:push-db-functions --functionsDir=custom/sql/
+```
+
+**CI Usage:**
+
+In GitHub Actions, pass the DB URL via a secret:
+
+```yaml
+- name: Push database functions
+  run: npx nx run my-api:push-db-functions --env=production
+  env:
+    SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+```
+
+**Notes:**
+
+- Files are executed in alphabetical order — prefix them (`01_`, `02_`) if ordering matters
+- Statements run outside an outer transaction, so each file is autonomous
+- Keep these files idempotent (`CREATE OR REPLACE`, `DROP ... IF EXISTS`); don't use for migrations
+
+**Error Handling:**
+
+- Returns `{ success: false }` if the functions directory doesn't exist
+- Returns `{ success: false }` if no DB URL can be resolved
+- Returns `{ success: false }` on any SQL execution error (connection is closed in a `finally`)
+
+---
+
 ## Plugin Options
 
 Configure the plugin behavior in `nx.json`.
@@ -506,6 +586,7 @@ interface SupabasePluginOptions {
   migrationNewTargetName?: string;
   linkTargetName?: string;
   dbDiffTargetName?: string;
+  pushDbFunctionsTargetName?: string;
 }
 ```
 
@@ -526,6 +607,7 @@ interface SupabasePluginOptions {
 | `migrationNewTargetName` | `string` | `'migration-new'` | Name of the migration-new target |
 | `linkTargetName` | `string` | `'link'` | Name of the link target |
 | `dbDiffTargetName` | `string` | `'db-diff'` | Name of the db-diff target |
+| `pushDbFunctionsTargetName` | `string` | `'push-db-functions'` | Name of the push-db-functions target |
 
 **Example Configuration:**
 

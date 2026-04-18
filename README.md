@@ -213,6 +213,12 @@ npx nx run <project>:link
 
 # Show database diff
 npx nx run <project>:db-diff
+
+# Push SQL files from db_functions/ to Postgres (local uses supabase status for URL)
+npx nx run <project>:push-db-functions
+
+# Push to a remote environment (DB URL from env or --dbUrl)
+SUPABASE_DB_URL="postgresql://..." npx nx run <project>:push-db-functions --env=production
 ```
 
 All targets (except `link`) automatically run `build` first to ensure configurations are up-to-date.
@@ -287,6 +293,7 @@ The plugin infers these targets:
 - `migration-new` - Create a new migration
 - `link` - Link to remote project
 - `db-diff` - Show database diff
+- `push-db-functions` - Push idempotent SQL (functions/views/policies) to Postgres via the pg driver
 - `run-command` - Run any Supabase command
 
 ## Examples
@@ -361,6 +368,7 @@ You can customize target names and configure global defaults:
         "migrationNewTargetName": "migration-new",
         "linkTargetName": "link",
         "dbDiffTargetName": "db-diff",
+        "pushDbFunctionsTargetName": "push-db-functions",
         "runCommandTargetName": "run-command"
       }
     }
