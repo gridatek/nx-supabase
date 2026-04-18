@@ -26,6 +26,7 @@ export interface SupabasePluginOptions {
   migrationNewTargetName?: string;
   linkTargetName?: string;
   dbDiffTargetName?: string;
+  pushDbFunctionsTargetName?: string;
   projects?: Record<string, SupabaseProjectOptions>;
 }
 
@@ -59,6 +60,8 @@ async function createNodesInternal(
   const migrationNewTargetName = options?.migrationNewTargetName ?? 'migration-new';
   const linkTargetName = options?.linkTargetName ?? 'link';
   const dbDiffTargetName = options?.dbDiffTargetName ?? 'db-diff';
+  const pushDbFunctionsTargetName =
+    options?.pushDbFunctionsTargetName ?? 'push-db-functions';
 
   for (const configFile of configFiles) {
     // configFile is the path to 'production/config.toml'
@@ -206,6 +209,10 @@ async function createNodesInternal(
         options: {
           command: 'supabase db diff',
         },
+        dependsOn: [buildTargetName],
+      },
+      [pushDbFunctionsTargetName]: {
+        executor: '@gridatek/nx-supabase:push-db-functions',
         dependsOn: [buildTargetName],
       },
     };
