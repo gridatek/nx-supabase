@@ -15,10 +15,10 @@
       "schema": "./dist/executors/gen-types/schema.json",
       "description": "Generates TypeScript types from Supabase schema"
     },
-    "load-db-functions": {
-      "implementation": "./dist/executors/load-db-functions/load-db-functions",
-      "schema": "./dist/executors/load-db-functions/schema.json",
-      "description": "Loads SQL files from db_functions/ into a Postgres database via the pg driver"
+    "push-db-functions": {
+      "implementation": "./dist/executors/push-db-functions/push-db-functions",
+      "schema": "./dist/executors/push-db-functions/schema.json",
+      "description": "Pushes SQL files from db_functions/ to a Postgres database via the pg driver"
     }
   }
 }

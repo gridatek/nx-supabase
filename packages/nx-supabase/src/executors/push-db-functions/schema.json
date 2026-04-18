@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/schema",
   "version": 2,
-  "title": "Load DB Functions executor",
-  "description": "Loads all SQL files in db_functions/ into a Postgres database (e.g. CREATE OR REPLACE FUNCTION). Uses the pg driver and the simple-query protocol so multi-statement files are supported.",
+  "title": "Push DB Functions executor",
+  "description": "Pushes all SQL files in db_functions/ to a Postgres database (e.g. CREATE OR REPLACE FUNCTION). Uses the pg driver and the simple-query protocol so multi-statement files are supported.",
   "type": "object",
   "properties": {
     "env": {

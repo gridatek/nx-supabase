@@ -3,10 +3,10 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, isAbsolute, join } from 'node:path';
 import { Client } from 'pg';
-import { LoadDbFunctionsExecutorSchema } from './schema';
+import { PushDbFunctionsExecutorSchema } from './schema';
 
 const runExecutor = async (
-  options: LoadDbFunctionsExecutorSchema,
+  options: PushDbFunctionsExecutorSchema,
   context: ExecutorContext
 ): Promise<{ success: boolean }> => {
   const projectName = context.projectName;
@@ -52,7 +52,7 @@ const runExecutor = async (
     return { success: false };
   }
 
-  logger.info(`Loading DB functions for ${projectName} (${env})`);
+  logger.info(`Pushing DB functions for ${projectName} (${env})`);
   logger.info(`From: ${functionsDir}`);
   logger.info(`Files: ${files.length}`);
   logger.info('');
@@ -67,12 +67,12 @@ const runExecutor = async (
 
   try {
     for (const file of files) {
-      logger.info(`→ loading ${basename(file)}`);
+      logger.info(`→ pushing ${basename(file)}`);
       const sql = readFileSync(file, 'utf8');
       await client.query(sql);
     }
     logger.info('');
-    logger.info(`✅ Loaded ${files.length} function file${files.length > 1 ? 's' : ''}`);
+    logger.info(`✅ Pushed ${files.length} function file${files.length > 1 ? 's' : ''}`);
     return { success: true };
   } catch (err) {
     logger.error(`Failed: ${(err as Error).message}`);
