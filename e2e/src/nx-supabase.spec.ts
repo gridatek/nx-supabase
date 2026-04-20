@@ -1,13 +1,10 @@
 import { execSync, spawn } from 'child_process';
 import { join, dirname } from 'path';
 import { mkdirSync, rmSync, existsSync } from 'fs';
-
 describe('@gridatek/nx-supabase', () => {
   let projectDirectory: string;
-
   beforeAll(() => {
     projectDirectory = createTestProject();
-
     // The plugin has been built and published to a local registry in the jest globalSetup
     // Use nx add to install the plugin and run the init generator (tests the real user flow)
     execSync(`npx nx add @gridatek/nx-supabase@e2e`, {
@@ -16,7 +13,6 @@ describe('@gridatek/nx-supabase', () => {
       env: process.env,
     });
   });
-
   afterAll(() => {
     if (projectDirectory) {
       // Cleanup the test project
@@ -26,7 +22,6 @@ describe('@gridatek/nx-supabase', () => {
       });
     }
   });
-
   it('should be installed', () => {
     // npm ls will fail if the package is not installed properly
     execSync('npm ls @gridatek/nx-supabase', {
@@ -34,53 +29,39 @@ describe('@gridatek/nx-supabase', () => {
       stdio: 'inherit',
     });
   });
-
   describe('init generator (via nx add)', () => {
     it('should have added supabase CLI to devDependencies', () => {
       // The init generator should have already run via nx add in beforeAll
       // Verify package.json was updated
       const packageJsonPath = join(projectDirectory, 'package.json');
       expect(existsSync(packageJsonPath)).toBe(true);
-
       const packageJson = require(packageJsonPath);
       expect(packageJson.devDependencies['supabase']).toBeDefined();
       expect(packageJson.devDependencies['supabase']).toBe('^2.65.6');
     });
   });
-
   describe('project generator', () => {
     it('should create a Supabase project with default local environment', () => {
       const projectName = 'my-supabase';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Verify project structure was created
       const projectPath = join(projectDirectory, projectName);
       expect(existsSync(projectPath)).toBe(true);
-
       // Verify default environment directories exist
       expect(existsSync(join(projectPath, 'production'))).toBe(true);
       expect(existsSync(join(projectPath, 'local'))).toBe(true);
-
       // Verify README exists
       expect(existsSync(join(projectPath, 'README.md'))).toBe(true);
-
       // Verify .gitignore exists
       expect(existsSync(join(projectPath, '.gitignore'))).toBe(true);
-
       // Verify .generated directory exists
       expect(existsSync(join(projectPath, '.generated'))).toBe(true);
-
       // Verify project.json was created (targets are inferred by the plugin at runtime)
       expect(existsSync(join(projectPath, 'project.json'))).toBe(true);
-
       // Verify that inferred targets are available using nx show project
       const showProjectOutput = execSync(
         `npx nx show project ${projectName} --json`,
@@ -97,10 +78,8 @@ describe('@gridatek/nx-supabase', () => {
       expect(projectConfig.targets.stop).toBeDefined();
       expect(projectConfig.targets['run-command']).toBeDefined();
     });
-
     it('should create a project with additional environments', () => {
       const projectName = 'multi-env-project';
-
       execSync(
         `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=staging`,
         {
@@ -109,21 +88,16 @@ describe('@gridatek/nx-supabase', () => {
           env: process.env,
         }
       );
-
       const projectPath = join(projectDirectory, projectName);
-
       // Verify production and local are always created
       expect(existsSync(join(projectPath, 'production'))).toBe(true);
       expect(existsSync(join(projectPath, 'local'))).toBe(true);
-
       // Verify additional environment (staging) was created
       expect(existsSync(join(projectPath, 'staging'))).toBe(true);
     });
-
     it('should create project in custom directory', () => {
       const projectName = 'custom-dir-project';
       const directory = 'apps/custom-dir-project';
-
       execSync(
         `npx nx g @gridatek/nx-supabase:project ${projectName} --directory=${directory}`,
         {
@@ -132,212 +106,151 @@ describe('@gridatek/nx-supabase', () => {
           env: process.env,
         }
       );
-
       const projectPath = join(projectDirectory, directory);
       expect(existsSync(projectPath)).toBe(true);
       expect(existsSync(join(projectPath, 'production'))).toBe(true);
     });
-
   });
-
   describe('build executor', () => {
     it('should build default and environment-specific files', () => {
       const projectName = 'build-test-project';
-
       // Create a project (production and local are created by default)
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       const projectPath = join(projectDirectory, projectName);
-
       // Run the build executor
-      execSync(
-        `npx nx run ${projectName}:build`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx run ${projectName}:build`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Verify .generated directories were created for all environments
-      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production', 'supabase'))).toBe(true);
-
+      expect(
+        existsSync(join(projectPath, '.generated', 'local', 'supabase'))
+      ).toBe(true);
+      expect(
+        existsSync(join(projectPath, '.generated', 'production', 'supabase'))
+      ).toBe(true);
       // Verify config.toml files exist
-      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production', 'supabase', 'config.toml'))).toBe(true);
+      expect(
+        existsSync(
+          join(projectPath, '.generated', 'local', 'supabase', 'config.toml')
+        )
+      ).toBe(true);
+      expect(
+        existsSync(
+          join(
+            projectPath,
+            '.generated',
+            'production',
+            'supabase',
+            'config.toml'
+          )
+        )
+      ).toBe(true);
     });
   });
-
   // Only run start/stop tests in CI environment
-  (process.env.CI ? describe : describe.skip)('start and stop executors', () => {
-    it('should start and stop Supabase using convenient shortcuts', async () => {
-      const projectName = 'start-stop-test-project';
-
-      // Create a project (production and local are created by default)
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
+  (process.env.CI ? describe : describe.skip)(
+    'start and stop executors',
+    () => {
+      it('should start and stop Supabase using convenient shortcuts', async () => {
+        const projectName = 'start-stop-test-project';
+        // Create a project (production and local are created by default)
+        execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
           cwd: projectDirectory,
           stdio: 'inherit',
           env: process.env,
-        }
-      );
-
-      const projectPath = join(projectDirectory, projectName);
-
-      // Start Supabase in background (detached process)
-      // The start target automatically runs build first
-      const startProcess = spawn(
-        'npx',
-        ['nx', 'run', `${projectName}:start`],
-        {
-          cwd: projectDirectory,
-          stdio: 'ignore', // Detach from stdio
-          shell: true,
-          detached: true,
-          env: process.env,
-        }
-      );
-
-      // Detach the process so it runs independently
-      startProcess.unref();
-
-      try {
-        // Wait for Supabase to be ready (poll status)
-        // In CI, Docker image pulls can take several minutes
-        let isReady = false;
-        const maxAttempts = 60; // 60 attempts * 5 seconds = 5 minutes max
-        const pollInterval = 5000; // 5 seconds
-
-        console.log(`Waiting for Supabase to start (max ${maxAttempts * pollInterval / 1000} seconds)...`);
-
-        for (let i = 0; i < maxAttempts; i++) {
-          await new Promise(resolve => setTimeout(resolve, pollInterval));
-
-          try {
-            // Check if Supabase is running using status command
-            execSync(
-              `npx nx run ${projectName}:run-command --command="supabase status"`,
-              {
-                cwd: projectDirectory,
-                stdio: 'ignore',
-                env: process.env,
-              }
-            );
-            console.log(`Supabase started successfully after ${(i + 1) * pollInterval / 1000} seconds`);
-            isReady = true;
-            break;
-          } catch (error) {
-            // Status check failed, Supabase not ready yet
-            if ((i + 1) % 6 === 0) {
-              // Log progress every 30 seconds
-              console.log(`Still waiting... (${(i + 1) * pollInterval / 1000}s elapsed)`);
-            }
-            continue;
-          }
-        }
-
-        if (!isReady) {
-          throw new Error(`Supabase failed to start within ${maxAttempts * pollInterval / 1000} seconds`);
-        }
-
-        // Verify .generated directory was created
-        expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
-
-        // Successfully started, now stop it using the convenient shortcut
-        execSync(
-          `npx nx run ${projectName}:stop`,
+        });
+        const projectPath = join(projectDirectory, projectName);
+        // Start Supabase in background (detached process)
+        // The start target automatically runs build first
+        const startProcess = spawn(
+          'npx',
+          ['nx', 'run', `${projectName}:start`],
           {
             cwd: projectDirectory,
-            stdio: 'inherit',
+            stdio: 'ignore', // Detach from stdio
+            shell: true,
+            detached: true,
             env: process.env,
           }
         );
-
-        // Verify Supabase stopped (status should fail)
-        let hasStopped = false;
+        // Detach the process so it runs independently
+        startProcess.unref();
         try {
-          execSync(
-            `npx nx run ${projectName}:run-command --command="supabase status"`,
-            {
-              cwd: projectDirectory,
-              stdio: 'ignore',
-              env: process.env,
-            }
+          // Wait for Supabase to be ready (poll status)
+          // In CI, Docker image pulls can take several minutes
+          let isReady = false;
+          const maxAttempts = 60; // 60 attempts * 5 seconds = 5 minutes max
+          const pollInterval = 5000; // 5 seconds
+          console.log(
+            `Waiting for Supabase to start (max ${
+              (maxAttempts * pollInterval) / 1000
+            } seconds)...`
           );
-        } catch (error) {
-          // Status check failed, meaning Supabase is stopped
-          hasStopped = true;
-        }
-
-        expect(hasStopped).toBe(true);
-      } finally {
-        // Cleanup: ensure Supabase is stopped even if test fails
-        try {
-          execSync(
-            `npx nx run ${projectName}:stop`,
-            {
-              cwd: projectDirectory,
-              stdio: 'ignore',
-              env: process.env,
+          for (let i = 0; i < maxAttempts; i++) {
+            await new Promise((resolve) => setTimeout(resolve, pollInterval));
+            try {
+              // Check if Supabase is running using status command
+              execSync(
+                `npx nx run ${projectName}:run-command --command="supabase status"`,
+                {
+                  cwd: projectDirectory,
+                  stdio: 'ignore',
+                  env: process.env,
+                }
+              );
+              console.log(
+                `Supabase started successfully after ${
+                  ((i + 1) * pollInterval) / 1000
+                } seconds`
+              );
+              isReady = true;
+              break;
+            } catch (error) {
+              // Status check failed, Supabase not ready yet
+              if ((i + 1) % 6 === 0) {
+                // Log progress every 30 seconds
+                console.log(
+                  `Still waiting... (${
+                    ((i + 1) * pollInterval) / 1000
+                  }s elapsed)`
+                );
+              }
+              continue;
             }
-          );
-        } catch (error) {
-          // Ignore errors during cleanup
-        }
-      }
-    }, 360000); // 6 minute timeout for this test (5 min for start + 1 min buffer)
-
-    // TODO: Fix flaky test - Docker prune conflicts cause intermittent failures
-    it.skip('should reset database successfully', async () => {
-      const projectName = 'db-reset-test-project';
-
-      // Create a project
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      const projectPath = join(projectDirectory, projectName);
-
-      // Start Supabase in background
-      const startProcess = spawn(
-        'npx',
-        ['nx', 'run', `${projectName}:start`],
-        {
-          cwd: projectDirectory,
-          stdio: 'ignore',
-          shell: true,
-          detached: true,
-          env: process.env,
-        }
-      );
-
-      startProcess.unref();
-
-      try {
-        // Wait for Supabase to be ready
-        let isReady = false;
-        const maxAttempts = 60;
-        const pollInterval = 5000;
-
-        console.log(`Waiting for Supabase to start for db reset test...`);
-
-        for (let i = 0; i < maxAttempts; i++) {
-          await new Promise(resolve => setTimeout(resolve, pollInterval));
-
+          }
+          if (!isReady) {
+            throw new Error(
+              `Supabase failed to start within ${
+                (maxAttempts * pollInterval) / 1000
+              } seconds`
+            );
+          }
+          // Verify .generated directory was created
+          expect(
+            existsSync(
+              join(
+                projectPath,
+                '.generated',
+                'local',
+                'supabase',
+                'config.toml'
+              )
+            )
+          ).toBe(true);
+          // Successfully started, now stop it using the convenient shortcut
+          execSync(`npx nx run ${projectName}:stop`, {
+            cwd: projectDirectory,
+            stdio: 'inherit',
+            env: process.env,
+          });
+          // Verify Supabase stopped (status should fail)
+          let hasStopped = false;
           try {
             execSync(
               `npx nx run ${projectName}:run-command --command="supabase status"`,
@@ -347,42 +260,36 @@ describe('@gridatek/nx-supabase', () => {
                 env: process.env,
               }
             );
-            console.log(`Supabase started successfully for db reset test after ${(i + 1) * pollInterval / 1000} seconds`);
-            isReady = true;
-            break;
           } catch (error) {
-            if ((i + 1) % 6 === 0) {
-              console.log(`Still waiting... (${(i + 1) * pollInterval / 1000}s elapsed)`);
-            }
-            continue;
+            // Status check failed, meaning Supabase is stopped
+            hasStopped = true;
+          }
+          expect(hasStopped).toBe(true);
+        } finally {
+          // Cleanup: ensure Supabase is stopped even if test fails
+          try {
+            execSync(`npx nx run ${projectName}:stop`, {
+              cwd: projectDirectory,
+              stdio: 'ignore',
+              env: process.env,
+            });
+          } catch (error) {
+            // Ignore errors during cleanup
           }
         }
-
-        if (!isReady) {
-          throw new Error(`Supabase failed to start within ${maxAttempts * pollInterval / 1000} seconds`);
-        }
-
-        // Stop Supabase to create a migration
-        console.log('Stopping Supabase to create migration...');
-        execSync(
-          `npx nx run ${projectName}:stop`,
-          {
-            cwd: projectDirectory,
-            stdio: 'inherit',
-            env: process.env,
-          }
-        );
-
-        // Create a migration file
-        const fs = require('fs');
-        const migrationsDir = join(projectPath, 'local', 'migrations');
-        fs.mkdirSync(migrationsDir, { recursive: true });
-        const migrationFile = join(migrationsDir, '20240101000000_create_users_table.sql');
-        fs.writeFileSync(migrationFile, 'CREATE TABLE users (id serial PRIMARY KEY, name text);');
-
-        // Restart Supabase (will run migrations)
-        console.log('Restarting Supabase with migration...');
-        const restartProcess = spawn(
+      }, 360000); // 6 minute timeout for this test (5 min for start + 1 min buffer)
+      // TODO: Fix flaky test - Docker prune conflicts cause intermittent failures
+      it.skip('should reset database successfully', async () => {
+        const projectName = 'db-reset-test-project';
+        // Create a project
+        execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+          cwd: projectDirectory,
+          stdio: 'inherit',
+          env: process.env,
+        });
+        const projectPath = join(projectDirectory, projectName);
+        // Start Supabase in background
+        const startProcess = spawn(
           'npx',
           ['nx', 'run', `${projectName}:start`],
           {
@@ -393,109 +300,181 @@ describe('@gridatek/nx-supabase', () => {
             env: process.env,
           }
         );
-        restartProcess.unref();
-
-        // Wait for Supabase to be ready again
-        isReady = false;
-        for (let i = 0; i < maxAttempts; i++) {
-          await new Promise(resolve => setTimeout(resolve, pollInterval));
-          try {
-            execSync(
-              `npx nx run ${projectName}:run-command --command="supabase status"`,
-              {
-                cwd: projectDirectory,
-                stdio: 'ignore',
-                env: process.env,
-              }
-            );
-            console.log(`Supabase restarted after ${(i + 1) * pollInterval / 1000} seconds`);
-            isReady = true;
-            break;
-          } catch (error) {
-            continue;
-          }
-        }
-
-        if (!isReady) {
-          throw new Error('Supabase failed to restart');
-        }
-
-        // Explicitly apply migrations to ensure the new table is created
-        console.log('Applying migrations - this ensures the new table is created...');
-        execSync(
-          `npx nx run ${projectName}:run-command --command="supabase migration up"`,
-          {
-            cwd: projectDirectory,
-            stdio: 'inherit',
-            env: process.env,
-          }
-        );
-
-        // Verify migrated table exists
-        console.log('Verifying migrated table exists...');
-        const usersTableBefore = execSync(
-          `docker exec -i supabase_db_${projectName}-local psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
-          {
-            cwd: projectDirectory,
-            encoding: 'utf-8',
-            env: process.env,
-          }
-        );
-        expect(usersTableBefore.trim()).toBe('users');
-
-        // Test db reset command
-        console.log('Testing db reset...');
-        execSync(
-          `npx nx run ${projectName}:run-command --command="supabase db reset"`,
-          {
-            cwd: projectDirectory,
-            stdio: 'inherit',
-            env: process.env,
-          }
-        );
-
-        // Verify Supabase is still running after reset
-        execSync(
-          `npx nx run ${projectName}:run-command --command="supabase status"`,
-          {
-            cwd: projectDirectory,
-            stdio: 'inherit',
-            env: process.env,
-          }
-        );
-
-        // Verify migrated table still exists (reset re-runs migrations)
-        console.log('Verifying migrated table still exists after reset...');
-        const usersTableAfter = execSync(
-          `docker exec -i supabase_db_${projectName}-local psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
-          {
-            cwd: projectDirectory,
-            encoding: 'utf-8',
-            env: process.env,
-          }
-        );
-        expect(usersTableAfter.trim()).toBe('users');
-
-        console.log('Database reset successful - migrations re-run correctly!');
-      } finally {
-        // Cleanup: ensure Supabase is stopped
+        startProcess.unref();
         try {
-          execSync(
-            `npx nx run ${projectName}:stop`,
+          // Wait for Supabase to be ready
+          let isReady = false;
+          const maxAttempts = 60;
+          const pollInterval = 5000;
+          console.log(`Waiting for Supabase to start for db reset test...`);
+          for (let i = 0; i < maxAttempts; i++) {
+            await new Promise((resolve) => setTimeout(resolve, pollInterval));
+            try {
+              execSync(
+                `npx nx run ${projectName}:run-command --command="supabase status"`,
+                {
+                  cwd: projectDirectory,
+                  stdio: 'ignore',
+                  env: process.env,
+                }
+              );
+              console.log(
+                `Supabase started successfully for db reset test after ${
+                  ((i + 1) * pollInterval) / 1000
+                } seconds`
+              );
+              isReady = true;
+              break;
+            } catch (error) {
+              if ((i + 1) % 6 === 0) {
+                console.log(
+                  `Still waiting... (${
+                    ((i + 1) * pollInterval) / 1000
+                  }s elapsed)`
+                );
+              }
+              continue;
+            }
+          }
+          if (!isReady) {
+            throw new Error(
+              `Supabase failed to start within ${
+                (maxAttempts * pollInterval) / 1000
+              } seconds`
+            );
+          }
+          // Stop Supabase to create a migration
+          console.log('Stopping Supabase to create migration...');
+          execSync(`npx nx run ${projectName}:stop`, {
+            cwd: projectDirectory,
+            stdio: 'inherit',
+            env: process.env,
+          });
+          // Create a migration file
+          const fs = require('fs');
+          const migrationsDir = join(projectPath, 'local', 'migrations');
+          fs.mkdirSync(migrationsDir, { recursive: true });
+          const migrationFile = join(
+            migrationsDir,
+            '20240101000000_create_users_table.sql'
+          );
+          fs.writeFileSync(
+            migrationFile,
+            'CREATE TABLE users (id serial PRIMARY KEY, name text);'
+          );
+          // Restart Supabase (will run migrations)
+          console.log('Restarting Supabase with migration...');
+          const restartProcess = spawn(
+            'npx',
+            ['nx', 'run', `${projectName}:start`],
             {
               cwd: projectDirectory,
               stdio: 'ignore',
+              shell: true,
+              detached: true,
               env: process.env,
             }
           );
-        } catch (error) {
-          // Ignore errors during cleanup
+          restartProcess.unref();
+          // Wait for Supabase to be ready again
+          isReady = false;
+          for (let i = 0; i < maxAttempts; i++) {
+            await new Promise((resolve) => setTimeout(resolve, pollInterval));
+            try {
+              execSync(
+                `npx nx run ${projectName}:run-command --command="supabase status"`,
+                {
+                  cwd: projectDirectory,
+                  stdio: 'ignore',
+                  env: process.env,
+                }
+              );
+              console.log(
+                `Supabase restarted after ${
+                  ((i + 1) * pollInterval) / 1000
+                } seconds`
+              );
+              isReady = true;
+              break;
+            } catch (error) {
+              continue;
+            }
+          }
+          if (!isReady) {
+            throw new Error('Supabase failed to restart');
+          }
+          // Explicitly apply migrations to ensure the new table is created
+          console.log(
+            'Applying migrations - this ensures the new table is created...'
+          );
+          execSync(
+            `npx nx run ${projectName}:run-command --command="supabase migration up"`,
+            {
+              cwd: projectDirectory,
+              stdio: 'inherit',
+              env: process.env,
+            }
+          );
+          // Verify migrated table exists
+          console.log('Verifying migrated table exists...');
+          const usersTableBefore = execSync(
+            `docker exec -i supabase_db_${projectName}-local psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
+            {
+              cwd: projectDirectory,
+              encoding: 'utf-8',
+              env: process.env,
+            }
+          );
+          expect(usersTableBefore.trim()).toBe('users');
+          // Test db reset command
+          console.log('Testing db reset...');
+          execSync(
+            `npx nx run ${projectName}:run-command --command="supabase db reset"`,
+            {
+              cwd: projectDirectory,
+              stdio: 'inherit',
+              env: process.env,
+            }
+          );
+          // Verify Supabase is still running after reset
+          execSync(
+            `npx nx run ${projectName}:run-command --command="supabase status"`,
+            {
+              cwd: projectDirectory,
+              stdio: 'inherit',
+              env: process.env,
+            }
+          );
+          // Verify migrated table still exists (reset re-runs migrations)
+          console.log('Verifying migrated table still exists after reset...');
+          const usersTableAfter = execSync(
+            `docker exec -i supabase_db_${projectName}-local psql -U postgres -d postgres -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users';"`,
+            {
+              cwd: projectDirectory,
+              encoding: 'utf-8',
+              env: process.env,
+            }
+          );
+          expect(usersTableAfter.trim()).toBe('users');
+          console.log(
+            'Database reset successful - migrations re-run correctly!'
+          );
+        } finally {
+          // Cleanup: ensure Supabase is stopped
+          try {
+            execSync(`npx nx run ${projectName}:stop`, {
+              cwd: projectDirectory,
+              stdio: 'ignore',
+              env: process.env,
+            });
+          } catch (error) {
+            // Ignore errors during cleanup
+          }
         }
-      }
-    }, 360000); // 6 minute timeout
-  });
+      }, 360000); // 6 minute timeout
+    }
+  );
 });
-
 /**
  * Creates a test project with create-nx-workspace and installs the plugin
  * @returns The directory where the test project was created
@@ -503,7 +482,6 @@ describe('@gridatek/nx-supabase', () => {
 function createTestProject() {
   const projectName = 'test-project';
   const projectDirectory = join(process.cwd(), 'tmp', projectName);
-
   // Ensure projectDirectory is empty
   rmSync(projectDirectory, {
     recursive: true,
@@ -512,7 +490,6 @@ function createTestProject() {
   mkdirSync(dirname(projectDirectory), {
     recursive: true,
   });
-
   execSync(
     `npx create-nx-workspace@latest ${projectName} --preset apps --nxCloud=skip --no-interactive`,
     {
@@ -522,6 +499,5 @@ function createTestProject() {
     }
   );
   console.log(`Created test project in "${projectDirectory}"`);
-
   return projectDirectory;
 }
