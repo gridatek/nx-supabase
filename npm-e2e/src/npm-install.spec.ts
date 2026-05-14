@@ -1,13 +1,10 @@
 import { execSync } from 'child_process';
 import { join, dirname } from 'path';
 import { mkdirSync, rmSync, existsSync, readFileSync } from 'fs';
-
 describe('@gridatek/nx-supabase npm installation', () => {
   let projectDirectory: string;
-
   beforeAll(() => {
     projectDirectory = createTestProject();
-
     // Install the plugin from npm using nx add
     // This tests the real user flow of installing from npm
     execSync(`npx nx add @gridatek/nx-supabase`, {
@@ -16,7 +13,6 @@ describe('@gridatek/nx-supabase npm installation', () => {
       env: process.env,
     });
   });
-
   afterAll(() => {
     if (projectDirectory) {
       // Cleanup the test project
@@ -26,7 +22,6 @@ describe('@gridatek/nx-supabase npm installation', () => {
       });
     }
   });
-
   it('should be installed from npm', () => {
     // npm ls will fail if the package is not installed properly
     execSync('npm ls @gridatek/nx-supabase', {
@@ -34,53 +29,39 @@ describe('@gridatek/nx-supabase npm installation', () => {
       stdio: 'inherit',
     });
   });
-
   describe('init generator (via nx add)', () => {
     it('should have added supabase CLI to devDependencies', () => {
       // The init generator should have already run via nx add in beforeAll
       // Verify package.json was updated
       const packageJsonPath = join(projectDirectory, 'package.json');
       expect(existsSync(packageJsonPath)).toBe(true);
-
       const packageJson = require(packageJsonPath);
       expect(packageJson.devDependencies['supabase']).toBeDefined();
       expect(packageJson.devDependencies['supabase']).toBe('^2.65.6');
     });
   });
-
   describe('project generator', () => {
     it('should create a Supabase project with default configuration', () => {
       const projectName = 'test-supabase-project';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Verify project structure was created
       const projectPath = join(projectDirectory, projectName);
       expect(existsSync(projectPath)).toBe(true);
-
       // Verify default environment directories exist
       expect(existsSync(join(projectPath, 'production'))).toBe(true);
       expect(existsSync(join(projectPath, 'local'))).toBe(true);
-
       // Verify README exists
       expect(existsSync(join(projectPath, 'README.md'))).toBe(true);
-
       // Verify .gitignore exists
       expect(existsSync(join(projectPath, '.gitignore'))).toBe(true);
-
       // Verify .generated directory exists
       expect(existsSync(join(projectPath, '.generated'))).toBe(true);
-
       // Verify project.json was created (targets are inferred by the plugin at runtime)
       expect(existsSync(join(projectPath, 'project.json'))).toBe(true);
-
       // Verify that inferred targets are available using nx show project
       const showProjectOutput = execSync(
         `npx nx show project ${projectName} --json`,
@@ -97,10 +78,8 @@ describe('@gridatek/nx-supabase npm installation', () => {
       expect(projectConfig.targets.stop).toBeDefined();
       expect(projectConfig.targets['run-command']).toBeDefined();
     });
-
     it('should create a project with additional environments', () => {
       const projectName = 'multi-env-npm-project';
-
       execSync(
         `npx nx g @gridatek/nx-supabase:project ${projectName} --environments=staging,development`,
         {
@@ -109,22 +88,17 @@ describe('@gridatek/nx-supabase npm installation', () => {
           env: process.env,
         }
       );
-
       const projectPath = join(projectDirectory, projectName);
-
       // Verify production and local are always created
       expect(existsSync(join(projectPath, 'production'))).toBe(true);
       expect(existsSync(join(projectPath, 'local'))).toBe(true);
-
       // Verify additional environments were created
       expect(existsSync(join(projectPath, 'staging'))).toBe(true);
       expect(existsSync(join(projectPath, 'development'))).toBe(true);
     });
-
     it('should create project in custom directory', () => {
       const projectName = 'custom-dir-project';
       const directory = 'apps/backend/custom-dir-project';
-
       execSync(
         `npx nx g @gridatek/nx-supabase:project ${projectName} --directory=${directory}`,
         {
@@ -133,111 +107,97 @@ describe('@gridatek/nx-supabase npm installation', () => {
           env: process.env,
         }
       );
-
       const projectPath = join(projectDirectory, directory);
       expect(existsSync(projectPath)).toBe(true);
       expect(existsSync(join(projectPath, 'production'))).toBe(true);
       expect(existsSync(join(projectPath, 'local'))).toBe(true);
       expect(existsSync(join(projectPath, 'project.json'))).toBe(true);
     });
-
     it('should create multiple projects in the same workspace', () => {
       const projectName1 = 'database-api';
       const projectName2 = 'database-web';
-
       // Create first project
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName1}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName1}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Create second project
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName2}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName2}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Verify both projects exist
       const projectPath1 = join(projectDirectory, projectName1);
       const projectPath2 = join(projectDirectory, projectName2);
-
       expect(existsSync(projectPath1)).toBe(true);
       expect(existsSync(projectPath2)).toBe(true);
-
       // Verify both have their own config
-      expect(existsSync(join(projectPath1, 'production', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath2, 'production', 'config.toml'))).toBe(true);
+      expect(existsSync(join(projectPath1, 'production', 'config.toml'))).toBe(
+        true
+      );
+      expect(existsSync(join(projectPath2, 'production', 'config.toml'))).toBe(
+        true
+      );
     });
   });
-
   describe('build executor', () => {
     it('should build configuration files for all environments', () => {
       const projectName = 'build-npm-test';
-
       // Create a project
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       const projectPath = join(projectDirectory, projectName);
-
       // Run the build executor
-      execSync(
-        `npx nx run ${projectName}:build`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx run ${projectName}:build`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Verify .generated directories were created for all environments
-      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production', 'supabase'))).toBe(true);
-
+      expect(
+        existsSync(join(projectPath, '.generated', 'local', 'supabase'))
+      ).toBe(true);
+      expect(
+        existsSync(join(projectPath, '.generated', 'production', 'supabase'))
+      ).toBe(true);
       // Verify config.toml files exist
-      expect(existsSync(join(projectPath, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath, '.generated', 'production', 'supabase', 'config.toml'))).toBe(true);
+      expect(
+        existsSync(
+          join(projectPath, '.generated', 'local', 'supabase', 'config.toml')
+        )
+      ).toBe(true);
+      expect(
+        existsSync(
+          join(
+            projectPath,
+            '.generated',
+            'production',
+            'supabase',
+            'config.toml'
+          )
+        )
+      ).toBe(true);
     });
-
   });
-
   describe('run-command executor', () => {
     it('should execute supabase commands', () => {
       const projectName = 'run-command-test';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Build the project first to generate config files
-      execSync(
-        `npx nx run ${projectName}:build`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx run ${projectName}:build`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Run supabase --version command
       const output = execSync(
         `npx nx run ${projectName}:run-command --command="supabase --version"`,
@@ -247,64 +207,43 @@ describe('@gridatek/nx-supabase npm installation', () => {
           env: process.env,
         }
       );
-
       // Verify command executed and returned version
       expect(output).toContain('supabase');
     });
   });
-
   describe('Nx integration', () => {
     it('should be detectable by nx show project command', () => {
       const projectName = 'nx-show-test';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Run nx show project command
-      const output = execSync(
-        `npx nx show project ${projectName} --json`,
-        {
-          cwd: projectDirectory,
-          encoding: 'utf-8',
-          env: process.env,
-        }
-      );
-
+      const output = execSync(`npx nx show project ${projectName} --json`, {
+        cwd: projectDirectory,
+        encoding: 'utf-8',
+        env: process.env,
+      });
       const projectInfo = JSON.parse(output);
       expect(projectInfo.name).toBe(projectName);
       expect(projectInfo.targets).toBeDefined();
       expect(projectInfo.targets.build).toBeDefined();
     });
-
     it('should work with nx run-many', () => {
       const projectName1 = 'run-many-test-1';
       const projectName2 = 'run-many-test-2';
-
       // Create two projects
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName1}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName2}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName1}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName2}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Run build on both projects
       execSync(
         `npx nx run-many -t build --projects=${projectName1},${projectName2}`,
@@ -314,76 +253,59 @@ describe('@gridatek/nx-supabase npm installation', () => {
           env: process.env,
         }
       );
-
       // Verify both were built
       const projectPath1 = join(projectDirectory, projectName1);
       const projectPath2 = join(projectDirectory, projectName2);
-
-      expect(existsSync(join(projectPath1, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
-      expect(existsSync(join(projectPath2, '.generated', 'local', 'supabase', 'config.toml'))).toBe(true);
+      expect(
+        existsSync(
+          join(projectPath1, '.generated', 'local', 'supabase', 'config.toml')
+        )
+      ).toBe(true);
+      expect(
+        existsSync(
+          join(projectPath2, '.generated', 'local', 'supabase', 'config.toml')
+        )
+      ).toBe(true);
     });
   });
-
   describe('generated files validation', () => {
     it('should generate valid config.toml files', () => {
       const projectName = 'config-validation';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       const projectPath = join(projectDirectory, projectName);
-
       // Run build
-      execSync(
-        `npx nx run ${projectName}:build`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx run ${projectName}:build`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       // Verify config.toml contains expected sections
       const localConfig = readFileSync(
         join(projectPath, '.generated', 'local', 'supabase', 'config.toml'),
         'utf-8'
       );
-
       expect(localConfig).toContain('[api]');
       expect(localConfig).toContain('[db]');
       expect(localConfig).toContain('[studio]');
     });
-
     it('should generate proper .gitignore content', () => {
       const projectName = 'gitignore-test';
-
-      execSync(
-        `npx nx g @gridatek/nx-supabase:project ${projectName}`,
-        {
-          cwd: projectDirectory,
-          stdio: 'inherit',
-          env: process.env,
-        }
-      );
-
+      execSync(`npx nx g @gridatek/nx-supabase:project ${projectName}`, {
+        cwd: projectDirectory,
+        stdio: 'inherit',
+        env: process.env,
+      });
       const projectPath = join(projectDirectory, projectName);
-      const gitignore = readFileSync(
-        join(projectPath, '.gitignore'),
-        'utf-8'
-      );
-
+      const gitignore = readFileSync(join(projectPath, '.gitignore'), 'utf-8');
       // Verify .generated is ignored
       expect(gitignore).toContain('.generated');
     });
   });
 });
-
 /**
  * Creates a test project with create-nx-workspace
  * @returns The directory where the test project was created
@@ -391,7 +313,6 @@ describe('@gridatek/nx-supabase npm installation', () => {
 function createTestProject() {
   const projectName = 'npm-test-project';
   const projectDirectory = join(process.cwd(), 'tmp', 'npm-e2e', projectName);
-
   // Ensure projectDirectory is empty
   rmSync(projectDirectory, {
     recursive: true,
@@ -400,7 +321,6 @@ function createTestProject() {
   mkdirSync(dirname(projectDirectory), {
     recursive: true,
   });
-
   execSync(
     `npx create-nx-workspace@latest ${projectName} --preset apps --nxCloud=skip --no-interactive`,
     {
@@ -410,6 +330,5 @@ function createTestProject() {
     }
   );
   console.log(`Created test project in "${projectDirectory}"`);
-
   return projectDirectory;
 }
