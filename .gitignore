@@ -52,3 +52,7 @@ e2e/test-project
 # Package files
 packages/nx-supabase/LICENSE
 packages/nx-supabase/README.md
+
+.claude/worktrees
+.nx/polygraph
+.nx/self-healing
