@@ -1,4 +1,4 @@
-import { CreateNodesContextV2 } from '@nx/devkit';
+import { CreateNodesContext } from '@nx/devkit';
 import { createNodesV2 } from './infer-tasks';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 describe('Supabase Plugin - Inferred Tasks', () => {
   let tempDir: string;
-  let context: CreateNodesContextV2;
+  let context: CreateNodesContext;
 
   beforeEach(() => {
     tempDir = join(process.cwd(), 'tmp', 'infer-tasks-test');
