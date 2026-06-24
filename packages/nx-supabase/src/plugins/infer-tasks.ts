@@ -1,9 +1,4 @@
-import {
-  CreateNodesV2,
-  CreateNodesContextV2,
-  CreateNodesResultV2,
-  TargetConfiguration,
-} from '@nx/devkit';
+import { CreateNodes, CreateNodesContext, CreateNodesResultArray, TargetConfiguration } from '@nx/devkit';
 import { dirname } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
@@ -34,7 +29,7 @@ export interface SupabasePluginOptions {
  * Detect Supabase projects by looking for 'production/config.toml'
  * This ensures we only match properly initialized Supabase projects
  */
-export const createNodesV2: CreateNodesV2<SupabasePluginOptions> = [
+export const createNodesV2: CreateNodes<SupabasePluginOptions> = [
   '**/production/config.toml',
   (configFiles, options, context) =>
     createNodesInternal(configFiles, options, context),
@@ -43,9 +38,9 @@ export const createNodesV2: CreateNodesV2<SupabasePluginOptions> = [
 async function createNodesInternal(
   configFiles: readonly string[],
   options: SupabasePluginOptions | undefined,
-  context: CreateNodesContextV2
-): Promise<CreateNodesResultV2> {
-  const results: CreateNodesResultV2 = [];
+  context: CreateNodesContext
+): Promise<CreateNodesResultArray> {
+  const results: CreateNodesResultArray = [];
 
   // Default target names (can be customized via options in nx.json)
   const buildTargetName = options?.buildTargetName ?? 'build';
