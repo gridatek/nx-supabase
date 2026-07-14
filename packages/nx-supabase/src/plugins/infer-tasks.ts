@@ -1,7 +1,7 @@
 import {
-  CreateNodesV2,
-  CreateNodesContextV2,
-  CreateNodesResultV2,
+  CreateNodes,
+  CreateNodesContext,
+  CreateNodesResultArray,
   TargetConfiguration,
 } from '@nx/devkit';
 import { dirname } from 'path';
@@ -34,7 +34,7 @@ export interface SupabasePluginOptions {
  * Detect Supabase projects by looking for 'production/config.toml'
  * This ensures we only match properly initialized Supabase projects
  */
-export const createNodesV2: CreateNodesV2<SupabasePluginOptions> = [
+export const createNodesV2: CreateNodes<SupabasePluginOptions> = [
   '**/production/config.toml',
   (configFiles, options, context) =>
     createNodesInternal(configFiles, options, context),
@@ -43,9 +43,9 @@ export const createNodesV2: CreateNodesV2<SupabasePluginOptions> = [
 async function createNodesInternal(
   configFiles: readonly string[],
   options: SupabasePluginOptions | undefined,
-  context: CreateNodesContextV2
-): Promise<CreateNodesResultV2> {
-  const results: CreateNodesResultV2 = [];
+  context: CreateNodesContext
+): Promise<CreateNodesResultArray> {
+  const results: CreateNodesResultArray = [];
 
   // Default target names (can be customized via options in nx.json)
   const buildTargetName = options?.buildTargetName ?? 'build';
@@ -57,7 +57,8 @@ async function createNodesInternal(
   const dbPushTargetName = options?.dbPushTargetName ?? 'db-push';
   const dbPullTargetName = options?.dbPullTargetName ?? 'db-pull';
   const genTypesTargetName = options?.genTypesTargetName ?? 'gen-types';
-  const migrationNewTargetName = options?.migrationNewTargetName ?? 'migration-new';
+  const migrationNewTargetName =
+    options?.migrationNewTargetName ?? 'migration-new';
   const linkTargetName = options?.linkTargetName ?? 'link';
   const dbDiffTargetName = options?.dbDiffTargetName ?? 'db-diff';
   const pushDbFunctionsTargetName =
@@ -76,11 +77,15 @@ async function createNodesInternal(
     }
 
     // Read project name from project.json
-    const projectJsonPath = join(context.workspaceRoot, projectRoot, 'project.json');
+    const projectJsonPath = join(
+      context.workspaceRoot,
+      projectRoot,
+      'project.json'
+    );
     if (!existsSync(projectJsonPath)) {
       throw new Error(
         `Missing project.json in Supabase project at '${projectRoot}'. ` +
-        `Please create a project.json file with a "name" property.`
+          `Please create a project.json file with a "name" property.`
       );
     }
 
@@ -136,9 +141,7 @@ async function createNodesInternal(
       [buildTargetName]: {
         executor: '@gridatek/nx-supabase:build',
         cache: true,
-        inputs: [
-          ...envDirs.map((env) => `{projectRoot}/${env}/**/*`),
-        ],
+        inputs: [...envDirs.map((env) => `{projectRoot}/${env}/**/*`)],
         outputs: ['{projectRoot}/.generated'],
       },
       [startTargetName]: {
