@@ -12,5 +12,8 @@
     {
       "path": "./npm-e2e"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0"
+  }
 }
